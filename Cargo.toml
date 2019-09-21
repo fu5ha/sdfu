@@ -2,9 +2,10 @@
 name = "sdfu"
 version = "0.0.1"
 authors = ["Gray Olson <gray@grayolson.com>"]
-description = "Signed Distance Field Utilities. Contains functions for creating, combining, modifying, and using analytic SDFs for computer graphics."
+description = "Signed Distance Field (Function) Utilities. Contains functions for creating, combining, modifying, and using analytic SDFs for computer graphics."
 license = "MIT+Apache-2.0"
 repository = "https://github.com/termhn/sdfu"
+readme = "README.md"
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
