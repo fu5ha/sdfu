@@ -2,7 +2,7 @@
 name = "sdfu"
 version = "0.0.1"
 authors = ["Gray Olson <gray@grayolson.com>"]
-description = "signed distance field utilities"
+description = "Signed Distance Field Utilities. Contains functions for creating, combining, modifying, and using analytic SDFs for computer graphics."
 license = "MIT+Apache-2.0"
 repository = "https://github.com/termhn/sdfu"
 edition = "2018"
