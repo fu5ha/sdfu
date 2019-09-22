@@ -1,6 +1,5 @@
 //! Operations you can perform to combine two SDFs.
 use super::*;
-use crate::mathtypes::*;
 use std::ops::*;
 
 /// A function which can get the minimum between two SDFs.
@@ -34,7 +33,8 @@ impl<T: MaxMin> MinFunction<T> for HardMin<T> {
 /// 
 /// This uses an exponential function to smooth between the two
 /// values, and `k` controls the radius/distance of the
-/// smoothing.
+/// smoothing. 32 is a good default value for `k` for this
+/// smoothing function.
 pub struct ExponentialSmoothMin<T> {
     pub k: T,
 }
@@ -62,11 +62,16 @@ where T: Copy + Neg<Output=T> + Mul<T, Output=T> + Add<T, Output=T> + Div<T, Out
 /// Takes the minimum of two values, smoothing between them
 /// when they are close. 
 /// 
-/// This uses an exponential function to smooth between the two
+/// This uses a polynomial function to smooth between the two
 /// values, and `k` controls the radius/distance of the
-/// smoothing.
+/// smoothing. 0.1 is a good default value for `k` for this
+/// smoothign function.
 pub struct PolySmoothMin<T> {
     pub k: T,
+}
+
+impl<T> PolySmoothMin<T> {
+    pub fn new(k: T) -> Self { PolySmoothMin { k } }
 }
 
 impl Default for PolySmoothMin<f32> {
@@ -93,7 +98,6 @@ where T: Neg<Output=T> + Mul<T, Output=T> + Add<T, Output=T>
     }
 }
 
-
 /// The union of two SDFs.
 #[derive(Clone, Copy, Debug)]
 pub struct Union<T, S1, S2, M> {
@@ -105,19 +109,33 @@ pub struct Union<T, S1, S2, M> {
 
 impl<T, S1, S2> Union<T, S1, S2, HardMin<T>>
 {
-    pub fn hard(sdf1: S1, sdf2: S2) -> Self { Union { sdf1, sdf2, min_func: HardMin::default(), _pd: std::marker::PhantomData } }
+    pub fn hard(sdf1: S1, sdf2: S2) -> Self {
+        Union {
+            sdf1,
+            sdf2,
+            min_func: HardMin::default(),
+            _pd: std::marker::PhantomData
+        }
+    }
 }
 
-impl<T, S1, S2, M> Union<T, S1, S2, M>
-where M: MinFunction<T> + Default
+impl<T, S1, S2> Union<T, S1, S2, PolySmoothMin<T>>
 {
-    pub fn new(sdf1: S1, sdf2: S2) -> Self { Union { sdf1, sdf2, min_func: M::default(), _pd: std::marker::PhantomData } }
+    pub fn smooth(sdf1: S1, sdf2: S2, smoothness: T) -> Self { 
+        Union {
+            sdf1,
+            sdf2,
+            min_func:
+            PolySmoothMin::new(smoothness),
+            _pd: std::marker::PhantomData 
+        }
+    }
 }
 
 impl<T, S1, S2, M> Union<T, S1, S2, M>
 where M: MinFunction<T>
 {
-    pub fn new_with(sdf1: S1, sdf2: S2, min_func: M) -> Self { Union { sdf1, sdf2, min_func, _pd: std::marker::PhantomData } }
+    pub fn new(sdf1: S1, sdf2: S2, min_func: M) -> Self { Union { sdf1, sdf2, min_func, _pd: std::marker::PhantomData } }
 }
 
 impl<T, V, S1, S2, M> SDF<T, V> for Union<T, S1, S2, M>
@@ -133,12 +151,49 @@ where T: Copy,
 }
 
 /// Get the subtracion of two SDFs. Note that this operation is *not* commutative,
-/// i.e. `subtraction(a, b) =/= subtracion(b, a)`.
-pub fn subtraction<T: Neg<Output=T> + MaxMin>(dist1: T, dist2: T) -> T {
-    -dist1.max(dist2)
+/// i.e. `Subtraction::new(a, b) =/= Subtraction::new(b, a)`.
+#[derive(Clone, Copy, Debug)]
+pub struct Subtraction<S1, S2> {
+    pub sdf1: S1,
+    pub sdf2: S2,
+}
+
+impl<S1, S2> Subtraction<S1, S2> {
+    /// Get the subtracion of two SDFs. Note that this operation is *not* commutative,
+    /// i.e. `Subtraction::new(a, b) =/= Subtraction::new(b, a)`.
+    pub fn new(sdf1: S1, sdf2: S2) -> Self { Subtraction { sdf1, sdf2 } }
+}
+
+impl<T, V, S1, S2> SDF<T, V> for Subtraction<S1, S2>
+where T: Copy + Neg<Output=T> + MaxMin,
+    V: Vec<T>,
+    S1: SDF<T, V>,
+    S2: SDF<T, V>
+{
+    fn dist(&self, p: V) -> T {
+        -self.sdf1.dist(p).max(self.sdf2.dist(p))
+    }
 }
 
 /// Get the intersection of two SDFs.
-pub fn intersection<T: MaxMin>(dist1: T, dist2: T) -> T {
-    dist1.max(dist2)
+#[derive(Clone, Copy, Debug)]
+pub struct Intersection<S1, S2> {
+    pub sdf1: S1,
+    pub sdf2: S2,
+}
+
+impl<S1, S2> Intersection<S1, S2> {
+    /// Get the intersection of two SDFs.
+    pub fn new(sdf1: S1, sdf2: S2) -> Self { Intersection { sdf1, sdf2 } }
+}
+
+impl<T, V, S1, S2> SDF<T, V> for Intersection<S1, S2>
+where T: Copy + MaxMin,
+    V: Vec<T>,
+    S1: SDF<T, V>,
+    S2: SDF<T, V>
+{
+    fn dist(&self, p: V) -> T {
+        self.sdf1.dist(p).max(self.sdf2.dist(p))
+    }
 }

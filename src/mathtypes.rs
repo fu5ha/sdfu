@@ -130,7 +130,9 @@ pub trait Vec2<T>: Vec<T> + Deref<Target=XY<T>> {
 
 pub trait Dimension {}
 
+#[derive(Clone, Copy, Debug)]
 pub struct Dim2D {}
+#[derive(Clone, Copy, Debug)]
 pub struct Dim3D {}
 
 impl Dimension for Dim2D {}

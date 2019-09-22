@@ -1,7 +1,6 @@
 //! Other random utilities that are helpful when using SDFs in computer graphics applications,
 //! such as estimating normals.
 use super::*;
-use crate::mathtypes::*;
 use std::ops::*;
 
 /// Estimates the normal of an `sdf` using an `estimator`, by default a CentralDifferenceEstimator.
@@ -19,7 +18,7 @@ where E: NormalEstimator<T, V> + Default,
 {
     /// Creates a new `EstimateNormal` with an SDF using the default version of the
     /// estimator type.
-    pub fn new(sdf: S) -> Self {
+    pub fn new_default(sdf: S) -> Self {
         EstimateNormal {
             sdf,
             estimator: E::default(),
@@ -35,7 +34,7 @@ where E: NormalEstimator<T, V>,
     V: Vec<T>,
 {
     /// Creates a new `EstimateNormal` with an SDF and a provided estimator.
-    pub fn new_with_estimator(sdf: S, estimator: E) -> Self {
+    pub fn new(sdf: S, estimator: E) -> Self {
         EstimateNormal {
             sdf,
             estimator,
@@ -51,7 +50,7 @@ where E: NormalEstimator<T, V>,
 }
 
 /// Estimate the normal of the SDF `sdf` at point `p`
-pub trait NormalEstimator<T, V> {
+pub trait NormalEstimator<T, V: Vec<T>> {
     fn estimate_normal<S: SDF<T, V>>(&self, sdf: S, p: V) -> V;
 }
 
