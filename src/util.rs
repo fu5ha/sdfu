@@ -78,42 +78,18 @@ impl<T, V: Vec<T>> CentralDifferenceEstimator<T, V, <V as Vec<T>>::Dimension>
     pub fn new(eps: T) -> Self { CentralDifferenceEstimator { eps, _pdv: std::marker::PhantomData, _pdd: std::marker::PhantomData } }
 }
 
-trait CentralDifferenceEstimatorImpl<T, V, D> {
-    fn internal_estimate_normal<S: SDF<T, V>>(&self, sdf: S, p: V, eps: T) -> V;
-}
-
-impl<T, V> CentralDifferenceEstimatorImpl<T, V, Dim3D> for CentralDifferenceEstimator<T, V, Dim3D>
-where T: Add<T, Output=T> + Sub<T, Output=T> + Copy,
-    V: Vec3<T>,
-{
-    fn internal_estimate_normal<S: SDF<T, V>>(&self, sdf: S, p: V, eps: T) -> V {
-        V::new(
-            sdf.dist(V::new(p.x + eps, p.y, p.z)) - sdf.dist(V::new(p.x - eps, p.y, p.z)),
-            sdf.dist(V::new(p.x, p.y + eps, p.z)) - sdf.dist(V::new(p.x, p.y - eps, p.z)),
-            sdf.dist(V::new(p.x, p.y, p.z + eps)) - sdf.dist(V::new(p.x, p.y, p.z - eps))
-        ).normalized()
-    }
-}
-
-impl<T, V> CentralDifferenceEstimatorImpl<T, V, Dim2D> for CentralDifferenceEstimator<T, V, Dim2D>
-where T: Add<T, Output=T> + Sub<T, Output=T> + Copy,
-    V: Vec2<T>,
-{
-    fn internal_estimate_normal<S: SDF<T, V>>(&self, sdf: S, p: V, eps: T) -> V {
-        V::new(
-            sdf.dist(V::new(p.x + eps, p.y)) - sdf.dist(V::new(p.x - eps, p.y)),
-            sdf.dist(V::new(p.x, p.y + eps)) - sdf.dist(V::new(p.x, p.y - eps)),
-        ).normalized()
-    }
-}
-
 impl<T, V> NormalEstimator<T, V> for CentralDifferenceEstimator<T, V, Dim3D> 
 where T: Add<T, Output=T> + Sub<T, Output=T> + Copy,
     V: Vec3<T>,
 {
     fn estimate_normal<S: SDF<T, V>>(&self, sdf: S, p: V) -> V 
     {
-        CentralDifferenceEstimatorImpl::internal_estimate_normal(self, sdf, p, self.eps)
+        let eps=self.eps;
+        V::new(
+            sdf.dist(V::new(p.x + eps, p.y, p.z)) - sdf.dist(V::new(p.x - eps, p.y, p.z)),
+            sdf.dist(V::new(p.x, p.y + eps, p.z)) - sdf.dist(V::new(p.x, p.y - eps, p.z)),
+            sdf.dist(V::new(p.x, p.y, p.z + eps)) - sdf.dist(V::new(p.x, p.y, p.z - eps))
+        ).normalized()
     }
 }
 
@@ -123,7 +99,11 @@ where T: Add<T, Output=T> + Sub<T, Output=T> + Copy,
 {
     fn estimate_normal<S: SDF<T, V>>(&self, sdf: S, p: V) -> V 
     {
-        CentralDifferenceEstimatorImpl::internal_estimate_normal(self, sdf, p, self.eps)
+        let eps=self.eps;
+        V::new(
+            sdf.dist(V::new(p.x + eps, p.y)) - sdf.dist(V::new(p.x - eps, p.y)),
+            sdf.dist(V::new(p.x, p.y + eps)) - sdf.dist(V::new(p.x, p.y - eps)),
+        ).normalized()
     }
 }
 
