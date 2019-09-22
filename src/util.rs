@@ -135,7 +135,7 @@ pub struct TetrahedralEstimator<T, V> {
 
 impl<T, V: Vec<T>> TetrahedralEstimator<T, V>
 {
-    /// Creates a `CentralDifferenceEstimator` with a given epsilon value.
+    /// Creates a `TetrahedralEstimator` with a given epsilon value.
     pub fn new(eps: T) -> Self { TetrahedralEstimator { eps, _pdv: std::marker::PhantomData } }
 }
 
