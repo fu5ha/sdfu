@@ -169,10 +169,10 @@ where T: Add<T, Output=T> + Sub<T, Output=T> + Neg<Output=T> + One + Copy,
         let yxy = V::new(-T::one(),  T::one(), -T::one());
         let xxx = V::one();
 
-        xyy * sdf.dist(p + xyy * self.eps) +
+        (xyy * sdf.dist(p + xyy * self.eps) +
             yyx * sdf.dist(p + xyy * self.eps) +
             yxy * sdf.dist(p + xyy * self.eps) +
-            xxx * sdf.dist(p + xxx * self.eps)
+            xxx * sdf.dist(p + xxx * self.eps)).normalized()
     }
 }
 
