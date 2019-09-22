@@ -139,11 +139,10 @@ impl<V: Vec<f64>> Default for CentralDifferenceEstimator<f64, V, <V as Vec<f64>>
 
 /// Estimates the normal of an SDF by estimating the gradient of the SDF.
 /// 
-/// The gradient is estimated by taking four samples of the SDF
-/// one slightly above (by `eps` distance) the point in question and one slightly below it and taking their
-/// difference, hence the 'central difference'. This estimation is relatively robust and accurate,
-/// but is also relatively slow since it takes 6 samples of the SDF. See the `TetrahedralEstimator` for
-/// an estimator which is slightly less robust/accurate but also slightly faster.
+/// The gradient is estimated by taking four samples of the SDF in a tetrahedron around the
+/// point of interest. By doing so, it only needs to take four instead of 6 samples of the SDF,
+/// like the CentralDifferenceEstimator does, so it is slightly faster. However, it only works
+/// for 3d SDFs and it is slightly less robust than the traditional way.
 /// 
 /// See [this article](http://iquilezles.org/www/articles/normalsSDF/normalsSDF.htm)
 /// for more.
