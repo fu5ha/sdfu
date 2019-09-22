@@ -145,10 +145,10 @@ where T: Add<T, Output=T> + Sub<T, Output=T> + Neg<Output=T> + One + Copy,
 {
     fn estimate_normal<S: SDF<T, V>>(&self, sdf: S, p: V) -> V 
     {
-        let xyy = V::new(T::one(), -T::one(), -T::one());
-        let yyx = V::new(-T::one(), -T::one(),  T::one());
-        let yxy = V::new(-T::one(),  T::one(), -T::one());
-        let xxx = V::one();
+        let xyy = V::new(T::ONE, -T::ONE, -T::ONE);
+        let yyx = V::new(-T::ONE, -T::ONE,  T::ONE);
+        let yxy = V::new(-T::ONE,  T::ONE, -T::ONE);
+        let xxx = V::ONE;
 
         (xyy * sdf.dist(p + xyy * self.eps) +
             yyx * sdf.dist(p + xyy * self.eps) +

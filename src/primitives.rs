@@ -45,8 +45,8 @@ impl<T, V> SDF<T, V> for Box<V>
 {
     fn dist(&self, p: V) -> T {
         let d = p.abs() - self.dims;
-        d.max(V::zero()).magnitude()
-            + d.y.max(d.z).max(d.x).min(T::zero())
+        d.max(V::ZERO).magnitude()
+            + d.y.max(d.z).max(d.x).min(T::ZERO)
     }
 }
 
@@ -126,7 +126,7 @@ impl<T, V> SDF<T, V> for CappedCylinder<T>
             Axis::Z => (p.x, p.y, p.z),
         };
         let d = V::Vec2::new(V::Vec2::new(a, b).magnitude(), c).abs() - V::Vec2::new(self.radius, self.height);
-        d.x.max(d.y).min(T::zero()) + d.max(V::Vec2::zero()).magnitude()
+        d.x.max(d.y).min(T::ZERO) + d.max(V::Vec2::ZERO).magnitude()
     }
 }
 
@@ -150,7 +150,7 @@ where T: Sub<T, Output=T> + Mul<T, Output=T> + Div<T, Output=T> + Zero + One + C
         let pa = p - self.a;
         let ba = self.b - self.a;
         let t = pa.dot(ba) / ba.dot(ba);
-        let h = t.clamp(T::zero(), T::one());
+        let h = t.clamp(T::ZERO, T::ZERO);
         (pa - (ba * h)).magnitude() - self.radius
     }
 }

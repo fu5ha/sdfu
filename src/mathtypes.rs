@@ -35,34 +35,52 @@ impl MaxMin for f64 {
 }
 
 pub trait One {
-    fn one() -> Self;
+    const ONE: Self;
 }
 
 impl One for f32 {
-    fn one() -> Self {
-        1.0
-    }
+    const ONE: Self = 1.0;
 }
 
 impl One for f64 {
-    fn one() -> Self {
-        1.0
-    }
+    const ONE: Self = 1.0;
 }
 
 pub trait Zero {
-    fn zero() -> Self;
+    const ZERO: Self;
 }
 
 impl Zero for f32 {
-    fn zero() -> Self {
-        0.0
-    }
+    const ZERO: Self = 1.0;
 }
 
 impl Zero for f64 {
-    fn zero() -> Self {
-        0.0
+    const ZERO: Self = 1.0;
+}
+
+pub trait PointFive {
+    const POINT_FIVE: Self;
+}
+
+impl PointFive for f32 {
+    const POINT_FIVE: Self = 0.5;
+}
+
+impl PointFive for f64 {
+    const POINT_FIVE: Self = 1.0;
+}
+
+/// Linear interpolate between self and other with a factor
+/// between Self::ZERO and Self::ONE.
+pub trait Lerp {
+    fn lerp(&self, other: Self, factor: Self) -> Self;
+}
+
+impl<T> Lerp for T
+where T: Copy + Mul<T, Output=T> + Sub<T, Output=T> + Add<T, Output=T> + One
+{
+    fn lerp(&self, other: Self, factor: Self) -> Self {
+        *self * (T::ONE - factor) + other * factor
     }
 }
 
@@ -80,6 +98,16 @@ impl Clamp for f64 {
     fn clamp(&self, low: Self, high: Self) -> Self {
         self.max(low).min(high)
     }
+}
+
+/// Raises `2^(self)`
+pub trait Exp2 {
+    fn exp2(&self) -> Self;
+}
+
+/// Returns log base 2 of self.
+pub trait Log2 {
+    fn log2(&self) -> Self;
 }
 
 pub trait Vec<T>: Sized + Copy + Neg<Output=Self> + Mul<T, Output=Self> + Add<Self, Output=Self> + Sub<Self, Output=Self> + MaxMin + Zero + One + Clamp {
