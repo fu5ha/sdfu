@@ -67,24 +67,4 @@ pub mod util;
 //     }
 // }
 
-// /// Operations you can perform to combine two SDFs.
-// pub mod ops {
-//     use crate::mathtypes::*;
-//     use std::ops::*;
-
-//     /// Get the union of two SDFs.
-//     pub fn union<T: MaxMin>(dist1: T, dist2: T) -> T {
-//         dist1.min(dist2)
-//     }
-
-//     /// Get the subtracion of two SDFs. Note that this operation is *not* commutative,
-//     /// i.e. `subtraction(a, b) =/= subtracion(b, a)`.
-//     pub fn subtraction<T: Neg<Output=T> + MaxMin>(dist1: T, dist2: T) -> T {
-//         -dist1.max(dist2)
-//     }
-
-//     /// Get the intersection of two SDFs.
-//     pub fn intersection<T: MaxMin>(dist1: T, dist2: T) -> T {
-//         dist1.max(dist2)
-//     }
-// }
+pub mod ops;
