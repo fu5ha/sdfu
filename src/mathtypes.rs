@@ -82,7 +82,7 @@ impl Clamp for f64 {
     }
 }
 
-pub trait Vec<T>: Sized + Copy + Neg<Output=Self> + Mul<T, Output=Self> + Add<Self, Output=Self> + Sub<Self, Output=Self> + MaxMin + Zero + Clamp {
+pub trait Vec<T>: Sized + Copy + Neg<Output=Self> + Mul<T, Output=Self> + Add<Self, Output=Self> + Sub<Self, Output=Self> + MaxMin + Zero + One + Clamp {
     type Dimension: Dimension;
     type Vec2: Vec2<T>;
     type Vec3: Vec3<T>;
