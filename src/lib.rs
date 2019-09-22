@@ -10,8 +10,6 @@ pub trait SDF<T, V>: Copy {
 pub mod primitives;
 pub use primitives::*;
 
-/// Other random utilities that are helpful when using SDFs in computer graphics applications,
-/// such as estimating normals.
 pub mod util;
 
 ///// Modifiers for SDFs.

@@ -1,3 +1,5 @@
+//! Other random utilities that are helpful when using SDFs in computer graphics applications,
+//! such as estimating normals.
 use super::*;
 use crate::mathtypes::*;
 use std::ops::*;
