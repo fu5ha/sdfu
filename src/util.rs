@@ -3,7 +3,9 @@
 use super::*;
 use std::ops::*;
 
-/// Estimates the normal of an `sdf` using an `estimator`, by default a CentralDifferenceEstimator.
+/// Estimates the normal of an `sdf` using an `estimator`, by default a `CentralDifferenceEstimator`,
+/// which provides a good default estimator that works for both 2D and 3D SDFs. See the documentation
+/// of `NormalEstimator` for more information.
 pub struct EstimateNormal<T, V: Vec<T>, S, E=CentralDifferenceEstimator<T, V, <V as Vec<T>>::Dimension>> {
     pub sdf: S,
     pub estimator: E,
@@ -49,7 +51,7 @@ where E: NormalEstimator<T, V>,
     }
 }
 
-/// Estimate the normal of the SDF `sdf` at point `p`
+/// `NormalEstimator`s provide a way to estimate the normal of the SDF `sdf` at point `p`.
 pub trait NormalEstimator<T, V: Vec<T>> {
     fn estimate_normal<S: SDF<T, V>>(&self, sdf: S, p: V) -> V;
 }

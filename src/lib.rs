@@ -1,5 +1,26 @@
+//! # `sdfu` - Signed Distance Field Utilities 
+//!
+//! This is a small crate designed to help when working with signed distance fields
+//! in the context of computer graphics, especially ray-marching based renderers. Most
+//! of what is here is based on [Inigo Quilez' excellent articles](http://www.iquilezles.org/www/index.htm).
+//!
+//! If you're using one of the more popular math libraries in Rust, then just enable
+//! the corresponding feature and hopefully all the necessary traits are already implemented
+//! for you so that you can just start passing in your `Vec3`s or whatever your lib calls them
+//! and you're off to the races! If not, then you can implement the necessary traits in the
+//! `mathtypes` module and still use this library with your own math lib.
+//! 
+//! This crate is built around the central trait `SDF`. This trait is structured in a similar way to
+//! how `std::iter::Iterator` works. Anything that implements `SDF` is able to return a distance from
+//! a point to its distance field. SDFs can be combined, modified, and otherwise used for various tasks
+//! by using the combinator methods on the `SDF` trait, or by directly using the structs that actually
+//! implement those combinators.
+//! 
+//! Most `SDF`s will be build up from one or more primitives being modified and combined together--the
+//! distance fields in the `primitive` module provide good starting points for this.
 pub mod mathtypes;
 use mathtypes::*;
+pub use mathtypes::{ Dimension, Dim2D, Dim3D };
 pub mod primitives;
 pub use primitives::*;
 
@@ -12,7 +33,7 @@ use mods::*;
 
 /// The core trait of this crate; an implementor of this trait is able
 /// to take in a vector and return the min distance from that vector to
-/// its field.
+/// a distance field.
 pub trait SDF<T, V: Vec<T>>: Copy {
     /// Get distance from `p` to this SDF.
     fn dist(&self, p: V) -> T;
@@ -86,5 +107,20 @@ pub trait SDF<T, V: Vec<T>>: Copy {
     where ElongateMulti<V, Self, <V as Vec<T>>::Dimension>: SDF<T, V>
     {
         ElongateMulti::new(self, elongation)
+    }
+
+    /// Translate the SDF by a vector.
+    fn translate(self, translation: V) -> Translate<V, Self> {
+        Translate::new(self, translation)
+    }
+
+    /// Rotate the SDF by a rotation.
+    fn rotate<R: Rotation<V>>(self, rotation: R) -> Rotate<R, Self> {
+        Rotate::new(self, rotation)
+    }
+    
+    /// Scale the SDF by a uniform scaling factor.
+    fn scale(self, scaling: T) -> Scale<T, Self> {
+        Scale::new(self, scaling)
     }
 }

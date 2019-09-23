@@ -5,10 +5,12 @@
 //! 
 //! Also note that while all translation and rotation transformations of the input point
 //! will work properly, scaling modifies the Euclidian space and therefore does not work
-//! normally.
+//! normally. Utility function shave been provided to `Translate`, `Rotate`, and `Scale`
+//! in the `SDF` trait and the `mods` module.
 use crate::mathtypes::*;
 use crate::SDF;
 use std::ops::*;
+use std::marker::PhantomData;
 
 /// A shere centered at origin with a radius.
 #[derive(Clone, Copy, Debug)]
@@ -31,15 +33,16 @@ impl<T, V> SDF<T, V> for Sphere<T>
 
 /// A box centered at origin with axis-aligned dimensions.
 #[derive(Clone, Copy, Debug)]
-pub struct Box<V> {
-    pub dims: V
+pub struct Box<V, D> {
+    pub dims: V,
+    _pd: PhantomData<D>,
 }
 
-impl<V> Box<V> {
-    pub fn new(dims: V) -> Self { Box { dims } }
+impl<V, D> Box<V, D> {
+    pub fn new(dims: V) -> Self { Box { dims, _pd: PhantomData } }
 }
 
-impl<T, V> SDF<T, V> for Box<V>
+impl<T, V> SDF<T, V> for Box<V, Dim3D>
     where T: Add<T, Output=T> + MaxMin + Zero + Copy,
         V: Vec3<T> + Copy
 {
@@ -47,6 +50,36 @@ impl<T, V> SDF<T, V> for Box<V>
         let d = p.abs() - self.dims;
         d.max(V::ZERO).magnitude()
             + d.y.max(d.z).max(d.x).min(T::ZERO)
+    }
+}
+
+impl<T, V> SDF<T, V> for Box<V, Dim2D>
+    where T: Add<T, Output=T> + MaxMin + Zero + Copy,
+        V: Vec2<T> + Copy
+{
+    fn dist(&self, p: V) -> T {
+        let d = p.abs() - self.dims;
+        d.max(V::ZERO).magnitude()
+            + d.y.max(d.x).min(T::ZERO)
+    }
+}
+
+/// A circle centered at origin with a radius.
+#[derive(Clone, Copy, Debug)]
+pub struct Circle<T> {
+    pub radius: T,
+}
+
+impl<T> Circle<T> {
+    pub fn new(radius: T) -> Self { Circle { radius } }
+}
+
+impl<T, V> SDF<T, V> for Circle<T>
+    where T: Sub<T, Output=T> + Copy,
+        V: Vec2<T>
+{
+    fn dist(&self, p: V) -> T {
+        p.magnitude() - self.radius
     }
 }
 
@@ -130,27 +163,27 @@ impl<T, V> SDF<T, V> for CappedCylinder<T>
     }
 }
 
-/// A capsule extending from `a` to `b` with radius `radius`.
+/// A capsule extending from `a` to `b` with thickness `thickness`.
 #[derive(Clone, Copy, Debug)]
-pub struct Capsule<T, V> {
+pub struct Line<T, V> {
     pub a: V,
     pub b: V,
-    pub radius: T,
+    pub thickness: T,
 }
 
-impl<T, V> Capsule<T, V> {
-    pub fn new(a: V, b: V, radius: T) -> Self { Capsule { a, b, radius } }
+impl<T, V> Line<T, V> {
+    pub fn new(a: V, b: V, thickness: T) -> Self { Line { a, b, thickness } }
 }
 
-impl<T, V> SDF<T, V> for Capsule<T, V>
+impl<T, V> SDF<T, V> for Line<T, V>
 where T: Sub<T, Output=T> + Mul<T, Output=T> + Div<T, Output=T> + Zero + One + Clamp + Copy,
-    V: Vec3<T> + Copy,
+    V: Vec<T> + Copy,
 {
     fn dist(&self, p: V) -> T {
         let pa = p - self.a;
         let ba = self.b - self.a;
         let t = pa.dot(ba) / ba.dot(ba);
-        let h = t.clamp(T::ZERO, T::ZERO);
-        (pa - (ba * h)).magnitude() - self.radius
+        let h = t.clamp(T::ZERO, T::ONE);
+        (pa - (ba * h)).magnitude() - self.thickness
     }
 }

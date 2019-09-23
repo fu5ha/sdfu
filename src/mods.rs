@@ -3,7 +3,7 @@ use crate::mathtypes::*;
 use super::*;
 use std::ops::*;
 
-/// Make an SDF have Round corners. `d` is distance obtained from SDF.
+/// Make an SDF have rounded outside edges.
 #[derive(Clone, Copy, Debug)]
 pub struct Round<T, S> {
     pub sdf: S,
@@ -24,7 +24,8 @@ where T: Copy + Sub<T, Output=T>,
     }
 }
 
-/// Elongate an SDF along a single axis.
+/// Elongate an SDF along a single axis. The elongation is
+/// symmetrical around the origin.
 #[derive(Clone, Copy, Debug)]
 pub struct Elongate<T, S, D> {
     pub sdf: S,
@@ -34,6 +35,7 @@ pub struct Elongate<T, S, D> {
 }
 
 impl<T, S, D> Elongate<T, S, D> {
+    /// Elongate an SDF along a single axis by `elongation`.
     pub fn new(sdf: S, axis: Axis, elongation: T) -> Self { Elongate { sdf, axis, elongation, _pd: std::marker::PhantomData } }
 }
 
@@ -102,5 +104,69 @@ where T: Copy + Add<T, Output=T> + Sub<T, Output=T> + Zero + MaxMin,
         let q = p.abs() - self.elongation;
         let t = q.x.max(q.y).min(T::ZERO);
         self.sdf.dist(q.max(V::ZERO)) + t
+    }
+}
+
+/// Translate an SDF.
+#[derive(Clone, Copy, Debug)]
+pub struct Translate<V, S> {
+    pub sdf: S,
+    pub translation: V,
+}
+
+impl<V, S> Translate<V, S> {
+    pub fn new(sdf: S, translation: V) -> Self { Translate { sdf, translation } }
+}
+
+impl<T, V, S> SDF<T, V> for Translate<V, S>
+where T: Copy,
+    V: Vec<T>,
+    S: SDF<T, V>
+{
+    fn dist(&self, p: V) -> T {
+        self.sdf.dist(p - self.translation)
+    }
+}
+
+/// Rotate an SDF.
+#[derive(Clone, Copy, Debug)]
+pub struct Rotate<R, S> {
+    pub sdf: S,
+    pub rotation: R,
+}
+
+impl<R, S> Rotate<R, S> {
+    pub fn new(sdf: S, rotation: R) -> Self { Rotate { sdf, rotation } }
+}
+
+impl<T, V, R, S> SDF<T, V> for Rotate<R, S>
+where T: Copy,
+    V: Vec<T>,
+    S: SDF<T, V>,
+    R: Rotation<V> + Copy,
+{
+    fn dist(&self, p: V) -> T {
+        self.sdf.dist(self.rotation.rotate_vec(p))
+    }
+}
+
+/// Rotate an SDF.
+#[derive(Clone, Copy, Debug)]
+pub struct Scale<T, S> {
+    pub sdf: S,
+    pub scaling: T,
+}
+
+impl<T, S> Scale<T, S> {
+    pub fn new(sdf: S, scaling: T) -> Self { Scale { sdf, scaling } }
+}
+
+impl<T, V, S> SDF<T, V> for Scale<T, S>
+where T: Copy + Mul<T, Output=T>,
+    V: Vec<T>,
+    S: SDF<T, V>,
+{
+    fn dist(&self, p: V) -> T {
+        self.sdf.dist(p / self.scaling) * self.scaling
     }
 }
