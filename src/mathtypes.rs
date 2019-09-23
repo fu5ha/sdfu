@@ -294,6 +294,44 @@ pub mod vek_integration {
         }
     }
     impl_vec_vec3!(f32, f64);
+
+    macro_rules! impl_rotation_mat {
+        {$($outer_t:ty => $inner_t:ty),+} => {
+            $(impl Rotation<$inner_t> for $outer_t {
+                fn rotate_vec(&self, v: $inner_t) -> $inner_t {
+                    <$inner_t>::from(vek::mat::Mat4::from(*self).inverted() * vek::vec::Vec4::from(v))
+                }
+            })+
+        }
+    }
+
+    impl_rotation_mat! {
+        vek::mat::Mat3<f32> => vek::vec::Vec2<f32>,
+        vek::mat::Mat2<f32> => vek::vec::Vec2<f32>,
+        vek::mat::Mat3<f32> => vek::vec::Vec3<f32>,
+        vek::mat::Mat4<f32> => vek::vec::Vec3<f32>,
+        vek::mat::Mat3<f64> => vek::vec::Vec2<f64>,
+        vek::mat::Mat2<f64> => vek::vec::Vec2<f64>,
+        vek::mat::Mat3<f64> => vek::vec::Vec3<f64>,
+        vek::mat::Mat4<f64> => vek::vec::Vec3<f64>
+    }
+
+    macro_rules! impl_rotation_quat {
+        {$($outer_t:ty => $inner_t:ty),+} => {
+            $(impl Rotation<$inner_t> for $outer_t {
+                fn rotate_vec(&self, v: $inner_t) -> $inner_t {
+                    <$inner_t>::from(self.inverse() * vek::vec::Vec4::from(v))
+                }
+            })+
+        }
+    }
+
+    impl_rotation_quat! {
+        vek::quaternion::Quaternion<f32> => vek::vec::Vec2<f32>,
+        vek::quaternion::Quaternion<f32> => vek::vec::Vec3<f32>,
+        vek::quaternion::Quaternion<f64> => vek::vec::Vec2<f64>,
+        vek::quaternion::Quaternion<f64> => vek::vec::Vec3<f64>
+    }
 }
 
 #[cfg(not(feature="vek"))]
