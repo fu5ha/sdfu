@@ -1,22 +1,5 @@
 use std::ops::*;
 
-/// A struct which provides x, y, and z coordinates.
-/// 3D vectors should be able to dereference into this
-/// struct.
-pub struct XYZ<T> {
-    pub x: T,
-    pub y: T,
-    pub z: T,
-}
-
-/// A struct which provides x, y, and z coordinates.
-/// 2D vectors should be able to dereference into this
-/// struct.
-pub struct XY<T> {
-    pub x: T,
-    pub y: T,
-}
-
 /// Functionality that should be shared between all vector types.
 pub trait Vec<T>: Sized + Copy
     + Neg<Output=Self> + Mul<T, Output=Self> + Add<Self, Output=Self> + Sub<Self, Output=Self>
@@ -32,13 +15,18 @@ pub trait Vec<T>: Sized + Copy
 }
 
 /// Functionality that must be implmeented by 3D vectors.
-pub trait Vec3<T>: Vec<T> + Deref<Target=XYZ<T>> {
+pub trait Vec3<T>: Vec<T> {
     fn new(x: T, y: T, z: T) -> Self;
+    fn x(&self) -> T;
+    fn y(&self) -> T;
+    fn z(&self) -> T;
 }
 
 /// Functionality that must be implmeented by 2D vectors.
-pub trait Vec2<T>: Vec<T> + Deref<Target=XY<T>> {
+pub trait Vec2<T>: Vec<T> {
     fn new(x: T, y: T) -> Self;
+    fn x(&self) -> T;
+    fn y(&self) -> T;
 }
 
 /// A trait used to mark the dimensionality of a vector/SDF/implmentation
@@ -138,18 +126,6 @@ pub trait Clamp {
     fn clamp(&self, low: Self, high: Self) -> Self;
 }
 
-impl Clamp for f32 {
-    fn clamp(&self, low: Self, high: Self) -> Self {
-        self.max(low).min(high)
-    }
-}
-
-impl Clamp for f64 {
-    fn clamp(&self, low: Self, high: Self) -> Self {
-        self.max(low).min(high)
-    }
-}
-
 /// Raises `2^(self)`
 pub trait Exp2 {
     fn exp2(&self) -> Self;
@@ -190,4 +166,300 @@ impl Log2 for f64 {
 /// normally produce.
 pub trait Rotation<V> {
     fn rotate_vec(&self, v: V) -> V;
+}
+
+#[cfg(feature="vek")]
+pub mod vek_integration {
+    use super::*;
+
+    impl<T: vek::ops::Clamp + Copy> Clamp for T {
+        fn clamp(&self, low: T, high: T) -> T {
+            self.clamped(low, high)
+        }
+    }
+
+    impl<T: Zero> Zero for vek::vec::Vec2<T> {
+        const ZERO: Self = vek::vec::Vec2::new(T::ZERO, T::ZERO);
+    }
+
+    impl<T: Zero> Zero for vek::vec::Vec3<T> {
+        const ZERO: Self = vek::vec::Vec3::new(T::ZERO, T::ZERO, T::ZERO);
+    }
+
+    impl<T: One> One for vek::vec::Vec2<T> {
+        const ONE: Self = vek::vec::Vec2::new(T::ONE, T::ONE);
+    }
+
+    impl<T: One> One for vek::vec::Vec3<T> {
+        const ONE: Self = vek::vec::Vec3::new(T::ONE, T::ONE, T::ONE);
+    }
+
+    impl<T: PartialOrd + Copy> MaxMin for vek::vec::Vec2<T> {
+        fn max(&self, other: Self) -> Self {
+            vek::vec::Vec2::partial_max(*self, other)
+        }
+
+        fn min(&self, other: Self) -> Self {
+            vek::vec::Vec2::partial_min(*self, other)
+        }
+    }
+
+    impl<T: PartialOrd + Copy> MaxMin for vek::vec::Vec3<T> {
+        fn max(&self, other: Self) -> Self {
+            vek::vec::Vec3::partial_max(*self, other)
+        }
+
+        fn min(&self, other: Self) -> Self {
+            vek::vec::Vec3::partial_min(*self, other)
+        }
+    }
+
+    macro_rules! impl_vec2 {
+        ($($inner_t:ty),+) => {
+            $(impl Vec2<$inner_t> for vek::vec::Vec2<$inner_t> {
+                fn new(x: $inner_t, y: $inner_t) -> Self {
+                    vek::vec::Vec2::new(x, y)
+                }
+                fn x(&self) -> $inner_t { self.x }
+                fn y(&self) -> $inner_t { self.y }
+            })+
+        }
+    }
+    impl_vec2!(f32, f64);
+
+    macro_rules! impl_vec3 {
+        ($($inner_t:ty),+) => {
+            $(impl Vec3<$inner_t> for vek::vec::Vec3<$inner_t> {
+                fn new(x: $inner_t, y: $inner_t, z: $inner_t) -> Self {
+                    vek::vec::Vec3::new(x, y, z)
+                }
+                fn x(&self) -> $inner_t { self.x }
+                fn y(&self) -> $inner_t { self.y }
+                fn z(&self) -> $inner_t { self.z }
+            })+
+        }
+    }
+    impl_vec3!(f32, f64);
+
+    macro_rules! impl_vec_vec2 {
+        ($($inner_t:ty),+) => {
+            $(impl Vec<$inner_t> for vek::vec::Vec2<$inner_t>
+            {
+                type Dimension = Dim3D;
+                type Vec2 = Self;
+                type Vec3 = vek::vec::Vec3<$inner_t>;
+                fn dot(&self, other: Self) -> $inner_t {
+                    vek::vec::Vec2::dot(*self, other)
+                }
+
+                fn magnitude(&self) -> $inner_t {
+                    vek::vec::Vec2::magnitude(*self)
+                }
+
+                fn abs(&self) -> Self {
+                    vek::vec::Vec2::new(self.x.abs(), self.y.abs())
+                }
+
+                fn normalized(&self) -> Self {
+                    vek::vec::Vec2::normalized(*self)
+                }
+            })+
+        }
+    }
+    impl_vec_vec2!(f32, f64);
+
+    macro_rules! impl_vec_vec3 {
+        ($($inner_t:ty),+) => {
+            $(impl Vec<$inner_t> for vek::vec::Vec3<$inner_t>
+            {
+                type Dimension = Dim3D;
+                type Vec2 = vek::vec::Vec2<$inner_t>;
+                type Vec3 = Self;
+                fn dot(&self, other: Self) -> $inner_t {
+                    vek::vec::Vec3::dot(*self, other)
+                }
+
+                fn magnitude(&self) -> $inner_t {
+                    vek::vec::Vec3::magnitude(*self)
+                }
+
+                fn abs(&self) -> Self {
+                    vek::vec::Vec3::new(self.x.abs(), self.y.abs(), self.z.abs())
+                }
+
+                fn normalized(&self) -> Self {
+                    vek::vec::Vec3::normalized(*self)
+                }
+            })+
+        }
+    }
+    impl_vec_vec3!(f32, f64);
+}
+
+#[cfg(not(feature="vek"))]
+impl Clamp for f32 {
+    fn clamp(&self, low: Self, high: Self) -> Self {
+        self.max(low).min(high)
+    }
+}
+
+#[cfg(not(feature="vek"))]
+impl Clamp for f64 {
+    fn clamp(&self, low: Self, high: Self) -> Self {
+        self.max(low).min(high)
+    }
+}
+
+
+#[cfg(feature="nalgebra")]
+pub mod nalgebra_integration {
+    use super::*;
+    use nalgebra as na;
+    use std::fmt::Debug;
+
+    impl<T: PartialOrd + Copy + Debug + 'static> Clamp for na::Vector2<T> {
+        fn clamp(&self, low: Self, high: Self) -> Self {
+            na::Vector2::new(na::clamp(self.x, low.x, high.x), na::clamp(self.y, low.y, high.y))
+        }
+    }
+
+    impl<T: PartialOrd + Copy + Debug + 'static> Clamp for na::Vector3<T> {
+        fn clamp(&self, low: Self, high: Self) -> Self {
+            na::Vector3::new(
+                na::clamp(self.x, low.x, high.x),
+                na::clamp(self.y, low.y, high.y),
+                na::clamp(self.z, low.z, high.z))
+        }
+    }
+
+    impl<T: PartialOrd + Copy + Debug + 'static> Clamp for na::Point2<T> {
+        fn clamp(&self, low: Self, high: Self) -> Self {
+            na::Point2::new(na::clamp(self.x, low.x, high.x), na::clamp(self.y, low.y, high.y))
+        }
+    }
+
+    impl<T: PartialOrd + Copy + Debug + 'static> Clamp for na::Point3<T> {
+        fn clamp(&self, low: Self, high: Self) -> Self {
+            na::Point3::new(
+                na::clamp(self.x, low.x, high.x),
+                na::clamp(self.y, low.y, high.y),
+                na::clamp(self.z, low.z, high.z))
+        }
+    }
+    // impl<T: Zero> Zero for vek::vec::Vec2<T> {
+    //     const ZERO: Self = vek::vec::Vec2::new(T::ZERO, T::ZERO);
+    // }
+
+    // impl<T: Zero> Zero for vek::vec::Vec3<T> {
+    //     const ZERO: Self = vek::vec::Vec3::new(T::ZERO, T::ZERO, T::ZERO);
+    // }
+
+    // impl<T: One> One for vek::vec::Vec2<T> {
+    //     const ONE: Self = vek::vec::Vec2::new(T::ONE, T::ONE);
+    // }
+
+    // impl<T: One> One for vek::vec::Vec3<T> {
+    //     const ONE: Self = vek::vec::Vec3::new(T::ONE, T::ONE, T::ONE);
+    // }
+
+    // impl<T: PartialOrd + Copy> MaxMin for vek::vec::Vec2<T> {
+    //     fn max(&self, other: Self) -> Self {
+    //         vek::vec::Vec2::partial_max(*self, other)
+    //     }
+
+    //     fn min(&self, other: Self) -> Self {
+    //         vek::vec::Vec2::partial_min(*self, other)
+    //     }
+    // }
+
+    // impl<T: PartialOrd + Copy> MaxMin for vek::vec::Vec3<T> {
+    //     fn max(&self, other: Self) -> Self {
+    //         vek::vec::Vec3::partial_max(*self, other)
+    //     }
+
+    //     fn min(&self, other: Self) -> Self {
+    //         vek::vec::Vec3::partial_min(*self, other)
+    //     }
+    // }
+
+    // macro_rules! impl_vec2 {
+    //     ($($inner_t:ty),+) => {
+    //         $(impl Vec2<$inner_t> for vek::vec::Vec2<$inner_t> {
+    //             fn new(x: $inner_t, y: $inner_t) -> Self {
+    //                 vek::vec::Vec2::new(x, y)
+    //             }
+    //             fn x(&self) -> $inner_t { self.x }
+    //             fn y(&self) -> $inner_t { self.y }
+    //         })+
+    //     }
+    // }
+    // impl_vec2!(f32, f64);
+
+    // macro_rules! impl_vec3 {
+    //     ($($inner_t:ty),+) => {
+    //         $(impl Vec3<$inner_t> for vek::vec::Vec3<$inner_t> {
+    //             fn new(x: $inner_t, y: $inner_t, z: $inner_t) -> Self {
+    //                 vek::vec::Vec3::new(x, y, z)
+    //             }
+    //             fn x(&self) -> $inner_t { self.x }
+    //             fn y(&self) -> $inner_t { self.y }
+    //             fn z(&self) -> $inner_t { self.z }
+    //         })+
+    //     }
+    // }
+    // impl_vec3!(f32, f64);
+
+    // macro_rules! impl_vec_vec2 {
+    //     ($($inner_t:ty),+) => {
+    //         $(impl Vec<$inner_t> for vek::vec::Vec2<$inner_t>
+    //         {
+    //             type Dimension = Dim3D;
+    //             type Vec2 = Self;
+    //             type Vec3 = vek::vec::Vec3<$inner_t>;
+    //             fn dot(&self, other: Self) -> $inner_t {
+    //                 vek::vec::Vec2::dot(*self, other)
+    //             }
+
+    //             fn magnitude(&self) -> $inner_t {
+    //                 vek::vec::Vec2::magnitude(*self)
+    //             }
+
+    //             fn abs(&self) -> Self {
+    //                 vek::vec::Vec2::new(self.x.abs(), self.y.abs())
+    //             }
+
+    //             fn normalized(&self) -> Self {
+    //                 vek::vec::Vec2::normalized(*self)
+    //             }
+    //         })+
+    //     }
+    // }
+    // impl_vec_vec2!(f32, f64);
+
+    // macro_rules! impl_vec_vec3 {
+    //     ($($inner_t:ty),+) => {
+    //         $(impl Vec<$inner_t> for vek::vec::Vec3<$inner_t>
+    //         {
+    //             type Dimension = Dim3D;
+    //             type Vec2 = vek::vec::Vec2<$inner_t>;
+    //             type Vec3 = Self;
+    //             fn dot(&self, other: Self) -> $inner_t {
+    //                 vek::vec::Vec3::dot(*self, other)
+    //             }
+
+    //             fn magnitude(&self) -> $inner_t {
+    //                 vek::vec::Vec3::magnitude(*self)
+    //             }
+
+    //             fn abs(&self) -> Self {
+    //                 vek::vec::Vec3::new(self.x.abs(), self.y.abs(), self.z.abs())
+    //             }
+
+    //             fn normalized(&self) -> Self {
+    //                 vek::vec::Vec3::normalized(*self)
+    //             }
+    //         })+
+    //     }
+    // }
+    // impl_vec_vec3!(f32, f64);
 }

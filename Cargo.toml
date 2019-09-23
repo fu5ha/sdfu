@@ -8,6 +8,6 @@ repository = "https://github.com/termhn/sdfu"
 readme = "README.md"
 edition = "2018"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
+vek = { version="0.9", optional=true }
+nalgebra = { version="0.18", optional=true }

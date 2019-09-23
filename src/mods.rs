@@ -90,7 +90,7 @@ where T: Copy + Add<T, Output=T> + Sub<T, Output=T> + Zero + MaxMin,
 {
     fn dist(&self, p: V) -> T {
         let q = p.abs() - self.elongation;
-        let t = q.y.max(q.z).max(q.x).min(T::ZERO);
+        let t = q.y().max(q.z()).max(q.x()).min(T::ZERO);
         self.sdf.dist(q.max(V::ZERO)) + t
     }
 }
@@ -102,7 +102,7 @@ where T: Copy + Add<T, Output=T> + Sub<T, Output=T> + Zero + MaxMin,
 {
     fn dist(&self, p: V) -> T {
         let q = p.abs() - self.elongation;
-        let t = q.x.max(q.y).min(T::ZERO);
+        let t = q.x().max(q.y()).min(T::ZERO);
         self.sdf.dist(q.max(V::ZERO)) + t
     }
 }

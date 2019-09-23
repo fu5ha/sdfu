@@ -49,7 +49,7 @@ impl<T, V> SDF<T, V> for Box<V, Dim3D>
     fn dist(&self, p: V) -> T {
         let d = p.abs() - self.dims;
         d.max(V::ZERO).magnitude()
-            + d.y.max(d.z).max(d.x).min(T::ZERO)
+            + d.y().max(d.z()).max(d.x()).min(T::ZERO)
     }
 }
 
@@ -60,7 +60,7 @@ impl<T, V> SDF<T, V> for Box<V, Dim2D>
     fn dist(&self, p: V) -> T {
         let d = p.abs() - self.dims;
         d.max(V::ZERO).magnitude()
-            + d.y.max(d.x).min(T::ZERO)
+            + d.y().max(d.x()).min(T::ZERO)
     }
 }
 
@@ -101,7 +101,7 @@ impl<T, V> SDF<T, V> for Torus<T>
         V: Vec3<T>,
 {
     fn dist(&self, p: V) -> T {
-        let q = V::Vec2::new(V::Vec2::new(p.x, p.z).magnitude() - self.thickness, p.y);
+        let q = V::Vec2::new(V::Vec2::new(p.x(), p.z()).magnitude() - self.thickness, p.y());
         q.magnitude() - self.radius
     }
 }
@@ -128,9 +128,9 @@ impl<T, V> SDF<T, V> for Cylinder<T>
 {
     fn dist(&self, p: V) -> T {
         let (a, b) = match self.axis {
-            Axis::X => (p.y, p.z),
-            Axis::Y => (p.x, p.z),
-            Axis::Z => (p.x, p.y),
+            Axis::X => (p.y(), p.z()),
+            Axis::Y => (p.x(), p.z()),
+            Axis::Z => (p.x(), p.y()),
         };
         V::Vec2::new(a, b).magnitude() - self.radius
     }
@@ -154,12 +154,12 @@ impl<T, V> SDF<T, V> for CappedCylinder<T>
 {
     fn dist(&self, p: V) -> T {
         let (a, b, c) = match self.axis {
-            Axis::X => (p.y, p.z, p.x),
-            Axis::Y => (p.x, p.z, p.y),
-            Axis::Z => (p.x, p.y, p.z),
+            Axis::X => (p.y(), p.z(), p.x()),
+            Axis::Y => (p.x(), p.z(), p.y()),
+            Axis::Z => (p.x(), p.y(), p.z()),
         };
         let d = V::Vec2::new(V::Vec2::new(a, b).magnitude(), c).abs() - V::Vec2::new(self.radius, self.height);
-        d.x.max(d.y).min(T::ZERO) + d.max(V::Vec2::ZERO).magnitude()
+        d.x().max(d.y()).min(T::ZERO) + d.max(V::Vec2::ZERO).magnitude()
     }
 }
 

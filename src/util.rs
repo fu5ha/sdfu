@@ -87,9 +87,9 @@ where T: Add<T, Output=T> + Sub<T, Output=T> + Copy,
     {
         let eps=self.eps;
         V::new(
-            sdf.dist(V::new(p.x + eps, p.y, p.z)) - sdf.dist(V::new(p.x - eps, p.y, p.z)),
-            sdf.dist(V::new(p.x, p.y + eps, p.z)) - sdf.dist(V::new(p.x, p.y - eps, p.z)),
-            sdf.dist(V::new(p.x, p.y, p.z + eps)) - sdf.dist(V::new(p.x, p.y, p.z - eps))
+            sdf.dist(V::new(p.x() + eps, p.y(), p.z())) - sdf.dist(V::new(p.x() - eps, p.y(), p.z())),
+            sdf.dist(V::new(p.x(), p.y() + eps, p.z())) - sdf.dist(V::new(p.x(), p.y() - eps, p.z())),
+            sdf.dist(V::new(p.x(), p.y(), p.z() + eps)) - sdf.dist(V::new(p.x(), p.y(), p.z() - eps))
         ).normalized()
     }
 }
@@ -102,8 +102,8 @@ where T: Add<T, Output=T> + Sub<T, Output=T> + Copy,
     {
         let eps=self.eps;
         V::new(
-            sdf.dist(V::new(p.x + eps, p.y)) - sdf.dist(V::new(p.x - eps, p.y)),
-            sdf.dist(V::new(p.x, p.y + eps)) - sdf.dist(V::new(p.x, p.y - eps)),
+            sdf.dist(V::new(p.x() + eps, p.y())) - sdf.dist(V::new(p.x() - eps, p.y())),
+            sdf.dist(V::new(p.x(), p.y() + eps)) - sdf.dist(V::new(p.x(), p.y() - eps)),
         ).normalized()
     }
 }
