@@ -59,7 +59,7 @@ pub trait NormalEstimator<T, V: Vec<T>> {
 /// Estimates the normal of an SDF by estimating the gradient of the SDF.
 /// 
 /// The gradient is estimated by taking two samples of the SDF in each dimension,
-/// one slightly above (by `eps` distance) the point in question and one slightly below it and taking their
+/// one()slightly above (by `eps` distance) the point in question and one()slightly below it and taking their
 /// difference, hence the 'central difference'. This estimation is relatively robust and accurate, and can
 /// work in both two and three dimensions, but is also relatively slow since it takes 6 samples of the SDF.
 /// See the `TetrahedralEstimator` for an estimator which is 3d only and slightly less robust/accurate but
@@ -146,10 +146,10 @@ where T: Add<T, Output=T> + Sub<T, Output=T> + Neg<Output=T> + One + Copy,
 {
     fn estimate_normal<S: SDF<T, V>>(&self, sdf: S, p: V) -> V 
     {
-        let xyy = V::new(T::ONE, -T::ONE, -T::ONE);
-        let yyx = V::new(-T::ONE, -T::ONE,  T::ONE);
-        let yxy = V::new(-T::ONE,  T::ONE, -T::ONE);
-        let xxx = V::ONE;
+        let xyy = V::new(T::one(), -T::one(), -T::one());
+        let yyx = V::new(-T::one(), -T::one(),  T::one());
+        let yxy = V::new(-T::one(),  T::one(), -T::one());
+        let xxx = V::one();
 
         (xyy * sdf.dist(p + xyy * self.eps) +
             yyx * sdf.dist(p + xyy * self.eps) +

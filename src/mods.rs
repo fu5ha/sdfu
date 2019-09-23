@@ -46,9 +46,9 @@ where T: Copy + Add<T, Output=T> + Sub<T, Output=T> + Zero,
 {
     fn dist(&self, p: V) -> T {
         let h = match self.axis {
-            Axis::X => V::new(self.elongation, T::ZERO, T::ZERO),
-            Axis::Y => V::new(T::ZERO, self.elongation, T::ZERO),
-            Axis::Z => V::new(T::ZERO, T::ZERO, self.elongation),
+            Axis::X => V::new(self.elongation, T::zero(), T::zero()),
+            Axis::Y => V::new(T::zero(), self.elongation, T::zero()),
+            Axis::Z => V::new(T::zero(), T::zero(), self.elongation),
         };
         let q = p - p.clamp(-h, h);
         self.sdf.dist(q)
@@ -62,8 +62,8 @@ where T: Copy + Add<T, Output=T> + Sub<T, Output=T> + Zero,
 {
     fn dist(&self, p: V) -> T {
         let h = match self.axis {
-            Axis::X => V::new(self.elongation, T::ZERO),
-            Axis::Y => V::new(T::ZERO, self.elongation),
+            Axis::X => V::new(self.elongation, T::zero()),
+            Axis::Y => V::new(T::zero(), self.elongation),
             Axis::Z => panic!("Attempting to use Z axis to elongate 2d SDF"),
         };
         let q = p - p.clamp(-h, h);
@@ -90,8 +90,8 @@ where T: Copy + Add<T, Output=T> + Sub<T, Output=T> + Zero + MaxMin,
 {
     fn dist(&self, p: V) -> T {
         let q = p.abs() - self.elongation;
-        let t = q.y().max(q.z()).max(q.x()).min(T::ZERO);
-        self.sdf.dist(q.max(V::ZERO)) + t
+        let t = q.y().max(q.z()).max(q.x()).min(T::zero());
+        self.sdf.dist(q.max(V::zero())) + t
     }
 }
 
@@ -102,8 +102,8 @@ where T: Copy + Add<T, Output=T> + Sub<T, Output=T> + Zero + MaxMin,
 {
     fn dist(&self, p: V) -> T {
         let q = p.abs() - self.elongation;
-        let t = q.x().max(q.y()).min(T::ZERO);
-        self.sdf.dist(q.max(V::ZERO)) + t
+        let t = q.x().max(q.y()).min(T::zero());
+        self.sdf.dist(q.max(V::zero())) + t
     }
 }
 

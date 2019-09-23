@@ -4,7 +4,7 @@
 //! in the context of computer graphics, especially ray-marching based renderers. Most
 //! of what is here is based on [Inigo Quilez' excellent articles](http://www.iquilezles.org/www/index.htm).
 //!
-//! If you're using one of the more popular math libraries in Rust, then just enable
+//! If you're using one()of the more popular math libraries in Rust, then just enable
 //! the corresponding feature and hopefully all the necessary traits are already implemented
 //! for you so that you can just start passing in your `Vec3`s or whatever your lib calls them
 //! and you're off to the races! If not, then you can implement the necessary traits in the
@@ -16,7 +16,7 @@
 //! by using the combinator methods on the `SDF` trait, or by directly using the structs that actually
 //! implement those combinators.
 //! 
-//! Most `SDF`s will be build up from one or more primitives being modified and combined together--the
+//! Most `SDF`s will be build up from one()or more primitives being modified and combined together--the
 //! distance fields in the `primitive` module provide good starting points for this.
 pub mod mathtypes;
 use mathtypes::*;
@@ -58,7 +58,7 @@ pub trait SDF<T, V: Vec<T>>: Copy {
         EstimateNormal::new(self, estimator)
     }
 
-    /// Get the union of this SDF and another one using a standard
+    /// Get the union of this SDF and another one()using a standard
     /// hard minimum, creating a sharp crease at the boundary between the
     /// two fields.
     fn union<O: SDF<T, V>>(self, other: O) -> Union<T, Self, O, HardMin<T>> {
@@ -73,7 +73,7 @@ pub trait SDF<T, V: Vec<T>>: Copy {
         Union::smooth(self, other, softness)
     }
 
-    /// Get the union of this SDF and another one using a provided
+    /// Get the union of this SDF and another one()using a provided
     /// minimum function. See the documentation of `MinFunction` for more.
     fn union_with<O: SDF<T, V>, M: MinFunction<T>>(self, other: O, min_function: M) -> Union<T, Self, O, M> {
         Union::new(self, other, min_function)
@@ -95,14 +95,14 @@ pub trait SDF<T, V: Vec<T>>: Copy {
         Round::new(self, radius)
     }
 
-    /// Elongate this SDF along one axis. The elongation is symmetrical about the origin.
+    /// Elongate this SDF along one()axis. The elongation is symmetrical about the origin.
     fn elongate(self, axis: Axis, elongation: T) -> Elongate<T, Self, <V as Vec<T>>::Dimension>
     where Elongate<T, Self, <V as Vec<T>>::Dimension>: SDF<T, V>
     {
         Elongate::new(self, axis, elongation)
     }
 
-    /// Elongate this SDF along one axis. The elongation is symmetrical about the origin.
+    /// Elongate this SDF along one()axis. The elongation is symmetrical about the origin.
     fn elongate_multi_axis(self, elongation: V) -> ElongateMulti<V, Self, <V as Vec<T>>::Dimension>
     where ElongateMulti<V, Self, <V as Vec<T>>::Dimension>: SDF<T, V>
     {

@@ -92,9 +92,9 @@ where T: Neg<Output=T> + Mul<T, Output=T> + Add<T, Output=T>
         + PointFive + One + Zero + Clamp + Copy
 {
     fn min(&self, a: T, b: T) -> T {
-        let t = T::POINT_FIVE + T::POINT_FIVE * (b - a) / self.k;
-        let h = t.clamp(T:: ZERO, T::ONE);
-        b.lerp(a, h) - self.k * h * (T::ONE - h)
+        let t = T::point_five()+ T::point_five()* (b - a) / self.k;
+        let h = t.clamp(T:: zero(), T::one());
+        b.lerp(a, h) - self.k * h * (T::one()- h)
     }
 }
 
