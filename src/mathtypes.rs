@@ -245,7 +245,7 @@ pub mod vek_integration {
         ($($inner_t:ty),+) => {
             $(impl Vec<$inner_t> for vek::vec::Vec2<$inner_t>
             {
-                type Dimension = Dim3D;
+                type Dimension = Dim2D;
                 type Vec2 = Self;
                 type Vec3 = vek::vec::Vec3<$inner_t>;
                 fn dot(&self, other: Self) -> $inner_t {
@@ -451,7 +451,7 @@ pub mod nalgebra_integration {
         ($($inner_t:ty),+) => {
             $(impl Vec<$inner_t> for na::Vector2<$inner_t>
             {
-                type Dimension = Dim3D;
+                type Dimension = Dim2D;
                 type Vec2 = Self;
                 type Vec3 = na::Vector3<$inner_t>;
                 fn dot(&self, other: Self) -> $inner_t {
