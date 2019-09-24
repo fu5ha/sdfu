@@ -4,7 +4,7 @@
 //! in the context of computer graphics, especially ray-marching based renderers. Most
 //! of what is here is based on [Inigo Quilez' excellent articles](http://www.iquilezles.org/www/index.htm).
 //!
-//! If you're using one()of the more popular math libraries in Rust, then just enable
+//! If you're using one of the more popular math libraries in Rust, then just enable
 //! the corresponding feature and hopefully all the necessary traits are already implemented
 //! for you so that you can just start passing in your `Vec3`s or whatever your lib calls them
 //! and you're off to the races! If not, then you can implement the necessary traits in the
@@ -16,8 +16,38 @@
 //! by using the combinator methods on the `SDF` trait, or by directly using the structs that actually
 //! implement those combinators.
 //! 
-//! Most `SDF`s will be build up from one()or more primitives being modified and combined together--the
+//! Most `SDF`s will be build up from one or more primitives being modified and combined together--the
 //! distance fields in the `primitive` module provide good starting points for this.
+//! 
+//! # Demo
+//! 
+//! ![demo image](https://raw.githubusercontent.com/termhn/sdfu/master/demo.png)
+//! 
+//! The image above was rendered with my own path tracing renderer, [`rayn`](https://github.com/termhn/rayn),
+//! by leveraging `sdfu`. The SDF that is rendered above was created with the following code:
+//! 
+//! ```rust
+//! use sdfu::SDF;
+//! 
+//! let sdf = sdfu::Sphere::new(0.45)
+//!     .subtract(
+//!         sdfu::Box::new(Vec3::new(0.25, 0.25, 1.5)))
+//!     .union_smooth(
+//!         sdfu::Sphere::new(0.3).translate(Vec3::new(0.3, 0.3, 0.0)),
+//!         0.1)
+//!     .union_smooth(
+//!         sdfu::Sphere::new(0.3).translate(Vec3::new(-0.3, 0.3, 0.0)),
+//!         0.1)
+//!     .subtract(
+//!         sdfu::Box::new(Vec3::new(0.125, 0.125, 1.5)).translate(Vec3::new(-0.3, 0.3, 0.0)))
+//!     .subtract(
+//!         sdfu::Box::new(Vec3::new(0.125, 0.125, 1.5)).translate(Vec3::new(0.3, 0.3, 0.0)))
+//!     .subtract(
+//!         sdfu::Box::new(Vec3::new(1.5, 0.1, 0.1)).translate(Vec3::new(0.0, 0.3, 0.0)))
+//!     .subtract(
+//!         sdfu::Box::new(Vec3::new(0.2, 2.0, 0.2)))
+//!     .translate(Vec3::new(0.0, 0.0, -1.0));
+//! ```
 pub mod mathtypes;
 use mathtypes::*;
 pub use mathtypes::{ Dimension, Dim2D, Dim3D };
