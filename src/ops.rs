@@ -12,6 +12,7 @@ pub trait MinFunction<T> {
 
 /// Takes the absolute minimum of two values
 /// and returns them directly. A standard min function.
+#[derive(Clone, Copy, Debug)]
 pub struct HardMin<T> {
     _pd: std::marker::PhantomData<T>,
 }
@@ -35,6 +36,7 @@ impl<T: MaxMin> MinFunction<T> for HardMin<T> {
 /// values, and `k` controls the radius/distance of the
 /// smoothing. 32 is a good default value for `k` for this
 /// smoothing function.
+#[derive(Clone, Copy, Debug)]
 pub struct ExponentialSmoothMin<T> {
     pub k: T,
 }
@@ -66,6 +68,7 @@ where T: Copy + Neg<Output=T> + Mul<T, Output=T> + Add<T, Output=T> + Div<T, Out
 /// values, and `k` controls the radius/distance of the
 /// smoothing. 0.1 is a good default value for `k` for this
 /// smoothign function.
+#[derive(Clone, Copy, Debug)]
 pub struct PolySmoothMin<T> {
     pub k: T,
 }
@@ -171,7 +174,7 @@ where T: Copy + Neg<Output=T> + MaxMin,
     S2: SDF<T, V>
 {
     fn dist(&self, p: V) -> T {
-        -self.sdf1.dist(p).max(self.sdf2.dist(p))
+        (-self.sdf1.dist(p)).max(self.sdf2.dist(p))
     }
 }
 

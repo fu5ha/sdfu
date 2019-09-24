@@ -39,18 +39,24 @@ pub trait SDF<T, V: Vec<T>>: Copy {
     fn dist(&self, p: V) -> T;
 
     /// Estimate the normals of this SDF using the default `NormalEstimator`.
-    fn normals(self) -> EstimateNormal<T, V, Self, CentralDifferenceEstimator<T, V, <V as Vec<T>>::Dimension>>
+    /// 
+    /// `eps` is the amount to change the point by for each sample.
+    /// 0.001 is a good default value to try; you will ideally vary this based on distance.
+    fn normals(self, eps: T) -> EstimateNormal<T, V, Self, CentralDifferenceEstimator<T, V, <V as Vec<T>>::Dimension>>
     where CentralDifferenceEstimator<T, V, <V as Vec<T>>::Dimension>: NormalEstimator<T, V> + Default
     {
-        EstimateNormal::new_default(self)
+        EstimateNormal::new(self, CentralDifferenceEstimator::new(eps))
     }
 
     /// Estimate the normals of this SDF using a fast, `TetrahedralEstimator`. Only
     /// works for 3d SDFs.
-    fn normals_fast(self) -> EstimateNormal<T, V, Self, TetrahedralEstimator<T, V>>
+    /// 
+    /// `eps` is the amount to change the point by for each sample.
+    /// 0.001 is a good default value to try; you will ideally vary this based on distance.
+    fn normals_fast(self, eps: T) -> EstimateNormal<T, V, Self, TetrahedralEstimator<T, V>>
     where TetrahedralEstimator<T, V>: NormalEstimator<T, V> + Default
     {
-        EstimateNormal::new(self, Default::default())
+        EstimateNormal::new(self, TetrahedralEstimator::new(eps))
     }
 
     /// Estimate the normals of this SDF using a provided `NormalEstimator`.
@@ -81,8 +87,8 @@ pub trait SDF<T, V: Vec<T>>: Copy {
     
     /// Get the subtracion of another SDF from this one. Note that this operation is *not* commutative,
     /// i.e. `a.subtraction(b) =/= b.subtraction(a)`.
-    fn subtraction<O: SDF<T, V>>(self, other: O) -> Subtraction<Self, O> {
-        Subtraction::new(self, other)
+    fn subtract<O: SDF<T, V>>(self, other: O) -> Subtraction<O, Self> {
+        Subtraction::new(other, self)
     }
 
     /// Get the intersection of this SDF and another one.
