@@ -11,3 +11,5 @@ edition = "2018"
 [dependencies]
 vek = { version="0.9", optional=true }
 nalgebra = { version="0.18", optional=true }
+# ultraviolet = { version="0.2.0-alpha6", optional=true }
+ultraviolet = { path="../ultraviolet", version="0.2.0-alpha6", optional=true }
