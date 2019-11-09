@@ -72,10 +72,7 @@ pub trait SDF<T, V: Vec<T>>: Copy {
     ///
     /// `eps` is the amount to change the point by for each sample.
     /// 0.001 is a good default value to try; you will ideally vary this based on distance.
-    fn normals(
-        self,
-        eps: T,
-    ) -> EstimateNormal<T, V, Self, CentralDifferenceEstimator<T, V, <V as Vec<T>>::Dimension>>
+    fn normals(self, eps: T) -> EstimateNormalDefault<T, V, Self>
     where
         CentralDifferenceEstimator<T, V, <V as Vec<T>>::Dimension>: NormalEstimator<T, V>,
     {
@@ -87,7 +84,7 @@ pub trait SDF<T, V: Vec<T>>: Copy {
     ///
     /// `eps` is the amount to change the point by for each sample.
     /// 0.001 is a good default value to try; you will ideally vary this based on distance.
-    fn normals_fast(self, eps: T) -> EstimateNormal<T, V, Self, TetrahedralEstimator<T, V>>
+    fn normals_fast(self, eps: T) -> EstimateNormalFast<T, V, Self>
     where
         TetrahedralEstimator<T, V>: NormalEstimator<T, V>,
     {

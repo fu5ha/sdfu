@@ -181,7 +181,6 @@ impl PointFive for f64 {
 /// Linear interpolate between self and other with a factor
 /// between Self::zero() and Self::one.
 pub trait Lerp {
-    #[inline]
     fn lerp(&self, other: Self, factor: Self) -> Self;
 }
 

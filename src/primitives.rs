@@ -187,6 +187,7 @@ where
     V: Vec3<T>,
 {
     #[inline]
+    #[allow(clippy::many_single_char_names)]
     fn dist(&self, p: V) -> T {
         let (a, b, c) = match self.axis {
             Axis::X => (p.y(), p.z(), p.x()),

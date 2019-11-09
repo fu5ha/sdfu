@@ -6,8 +6,15 @@ use std::ops::*;
 #[cfg(feature = "ultraviolet")]
 use ultraviolet::f32x4;
 
-/// Estimates the normal of an `sdf` using an `estimator`, by default a `CentralDifferenceEstimator`,
-/// which provides a good default estimator that works for both 2D and 3D SDFs. See the documentation
+pub type EstimateNormalDefault<T, V, S> =
+    EstimateNormal<T, V, S, CentralDifferenceEstimator<T, V, <V as Vec<T>>::Dimension>>;
+
+pub type EstimateNormalFast<T, V, S> = EstimateNormal<T, V, S, TetrahedralEstimator<T, V>>;
+
+/// Estimates the normal of an `sdf` using an `estimator`.
+///
+/// It is reasonable by default to choose a `CentralDifferenceEstimator`,
+/// which provides an estimator that works for both 2D and 3D SDFs. See the documentation
 /// of `NormalEstimator` for more information.
 pub struct EstimateNormal<T, V, S, E> {
     pub sdf: S,
