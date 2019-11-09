@@ -77,7 +77,7 @@ pub trait SDF<T, V: Vec<T>>: Copy {
         eps: T,
     ) -> EstimateNormal<T, V, Self, CentralDifferenceEstimator<T, V, <V as Vec<T>>::Dimension>>
     where
-        CentralDifferenceEstimator<T, V, <V as Vec<T>>::Dimension>: NormalEstimator<T, V> + Default,
+        CentralDifferenceEstimator<T, V, <V as Vec<T>>::Dimension>: NormalEstimator<T, V>,
     {
         EstimateNormal::new(self, CentralDifferenceEstimator::new(eps))
     }
@@ -89,7 +89,7 @@ pub trait SDF<T, V: Vec<T>>: Copy {
     /// 0.001 is a good default value to try; you will ideally vary this based on distance.
     fn normals_fast(self, eps: T) -> EstimateNormal<T, V, Self, TetrahedralEstimator<T, V>>
     where
-        TetrahedralEstimator<T, V>: NormalEstimator<T, V> + Default,
+        TetrahedralEstimator<T, V>: NormalEstimator<T, V>,
     {
         EstimateNormal::new(self, TetrahedralEstimator::new(eps))
     }

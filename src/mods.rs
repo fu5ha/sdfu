@@ -1,6 +1,6 @@
 //! Modifiers for SDFs.
-use crate::mathtypes::*;
 use super::*;
+use crate::mathtypes::*;
 use std::ops::*;
 
 /// Make an SDF have rounded outside edges.
@@ -11,14 +11,18 @@ pub struct Round<T, S> {
 }
 
 impl<T, S> Round<T, S> {
-    pub fn new(sdf: S, radius: T) -> Self { Round { sdf, radius } }
+    pub fn new(sdf: S, radius: T) -> Self {
+        Round { sdf, radius }
+    }
 }
 
 impl<T, V, S> SDF<T, V> for Round<T, S>
-where T: Copy + Sub<T, Output=T>,
+where
+    T: Copy + Sub<T, Output = T>,
     V: Vec<T>,
-    S: SDF<T, V>
+    S: SDF<T, V>,
 {
+    #[inline]
     fn dist(&self, p: V) -> T {
         self.sdf.dist(p) - self.radius
     }
@@ -31,19 +35,28 @@ pub struct Elongate<T, S, D> {
     pub sdf: S,
     pub axis: Axis,
     pub elongation: T,
-    _pd: std::marker::PhantomData<D>
+    _pd: std::marker::PhantomData<D>,
 }
 
 impl<T, S, D> Elongate<T, S, D> {
     /// Elongate an SDF along a single axis by `elongation`.
-    pub fn new(sdf: S, axis: Axis, elongation: T) -> Self { Elongate { sdf, axis, elongation, _pd: std::marker::PhantomData } }
+    pub fn new(sdf: S, axis: Axis, elongation: T) -> Self {
+        Elongate {
+            sdf,
+            axis,
+            elongation,
+            _pd: std::marker::PhantomData,
+        }
+    }
 }
 
 impl<T, V, S> SDF<T, V> for Elongate<T, S, Dim3D>
-where T: Copy + Add<T, Output=T> + Sub<T, Output=T> + Zero,
+where
+    T: Copy + Add<T, Output = T> + Sub<T, Output = T> + Zero,
     V: Vec3<T>,
-    S: SDF<T, V>
+    S: SDF<T, V>,
 {
+    #[inline]
     fn dist(&self, p: V) -> T {
         let h = match self.axis {
             Axis::X => V::new(self.elongation, T::zero(), T::zero()),
@@ -56,10 +69,12 @@ where T: Copy + Add<T, Output=T> + Sub<T, Output=T> + Zero,
 }
 
 impl<T, V, S> SDF<T, V> for Elongate<T, S, Dim2D>
-where T: Copy + Add<T, Output=T> + Sub<T, Output=T> + Zero,
+where
+    T: Copy + Add<T, Output = T> + Sub<T, Output = T> + Zero,
     V: Vec2<T>,
-    S: SDF<T, V>
+    S: SDF<T, V>,
 {
+    #[inline]
     fn dist(&self, p: V) -> T {
         let h = match self.axis {
             Axis::X => V::new(self.elongation, T::zero()),
@@ -76,18 +91,26 @@ where T: Copy + Add<T, Output=T> + Sub<T, Output=T> + Zero,
 pub struct ElongateMulti<V, S, D> {
     pub sdf: S,
     pub elongation: V,
-    _pd: std::marker::PhantomData<D>
+    _pd: std::marker::PhantomData<D>,
 }
 
 impl<V, S, D> ElongateMulti<V, S, D> {
-    pub fn new(sdf: S, elongation: V) -> Self { ElongateMulti { sdf, elongation, _pd: std::marker::PhantomData } }
+    pub fn new(sdf: S, elongation: V) -> Self {
+        ElongateMulti {
+            sdf,
+            elongation,
+            _pd: std::marker::PhantomData,
+        }
+    }
 }
 
 impl<T, V, S> SDF<T, V> for ElongateMulti<V, S, Dim3D>
-where T: Copy + Add<T, Output=T> + Sub<T, Output=T> + Zero + MaxMin,
+where
+    T: Copy + Add<T, Output = T> + Sub<T, Output = T> + Zero + MaxMin,
     V: Vec3<T>,
-    S: SDF<T, V>
+    S: SDF<T, V>,
 {
+    #[inline]
     fn dist(&self, p: V) -> T {
         let q = p.abs() - self.elongation;
         let t = q.y().max(q.z()).max(q.x()).min(T::zero());
@@ -96,10 +119,12 @@ where T: Copy + Add<T, Output=T> + Sub<T, Output=T> + Zero + MaxMin,
 }
 
 impl<T, V, S> SDF<T, V> for ElongateMulti<V, S, Dim2D>
-where T: Copy + Add<T, Output=T> + Sub<T, Output=T> + Zero + MaxMin,
+where
+    T: Copy + Add<T, Output = T> + Sub<T, Output = T> + Zero + MaxMin,
     V: Vec2<T>,
-    S: SDF<T, V>
+    S: SDF<T, V>,
 {
+    #[inline]
     fn dist(&self, p: V) -> T {
         let q = p.abs() - self.elongation;
         let t = q.x().max(q.y()).min(T::zero());
@@ -115,14 +140,18 @@ pub struct Translate<V, S> {
 }
 
 impl<V, S> Translate<V, S> {
-    pub fn new(sdf: S, translation: V) -> Self { Translate { sdf, translation } }
+    pub fn new(sdf: S, translation: V) -> Self {
+        Translate { sdf, translation }
+    }
 }
 
 impl<T, V, S> SDF<T, V> for Translate<V, S>
-where T: Copy,
+where
+    T: Copy,
     V: Vec<T>,
-    S: SDF<T, V>
+    S: SDF<T, V>,
 {
+    #[inline]
     fn dist(&self, p: V) -> T {
         self.sdf.dist(p - self.translation)
     }
@@ -136,15 +165,19 @@ pub struct Rotate<R, S> {
 }
 
 impl<R, S> Rotate<R, S> {
-    pub fn new(sdf: S, rotation: R) -> Self { Rotate { sdf, rotation } }
+    pub fn new(sdf: S, rotation: R) -> Self {
+        Rotate { sdf, rotation }
+    }
 }
 
 impl<T, V, R, S> SDF<T, V> for Rotate<R, S>
-where T: Copy,
+where
+    T: Copy,
     V: Vec<T>,
     S: SDF<T, V>,
     R: Rotation<V> + Copy,
 {
+    #[inline]
     fn dist(&self, p: V) -> T {
         self.sdf.dist(self.rotation.rotate_vec(p))
     }
@@ -158,14 +191,18 @@ pub struct Scale<T, S> {
 }
 
 impl<T, S> Scale<T, S> {
-    pub fn new(sdf: S, scaling: T) -> Self { Scale { sdf, scaling } }
+    pub fn new(sdf: S, scaling: T) -> Self {
+        Scale { sdf, scaling }
+    }
 }
 
 impl<T, V, S> SDF<T, V> for Scale<T, S>
-where T: Copy + Mul<T, Output=T>,
+where
+    T: Copy + Mul<T, Output = T>,
     V: Vec<T>,
     S: SDF<T, V>,
 {
+    #[inline]
     fn dist(&self, p: V) -> T {
         self.sdf.dist(p / self.scaling) * self.scaling
     }

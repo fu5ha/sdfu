@@ -9,34 +9,10 @@ use ultraviolet::f32x4;
 /// Estimates the normal of an `sdf` using an `estimator`, by default a `CentralDifferenceEstimator`,
 /// which provides a good default estimator that works for both 2D and 3D SDFs. See the documentation
 /// of `NormalEstimator` for more information.
-pub struct EstimateNormal<
-    T,
-    V: Vec<T>,
-    S,
-    E = CentralDifferenceEstimator<T, V, <V as Vec<T>>::Dimension>,
-> {
+pub struct EstimateNormal<T, V, S, E> {
     pub sdf: S,
     pub estimator: E,
-    _pdt: std::marker::PhantomData<T>,
-    _pdv: std::marker::PhantomData<V>,
-}
-
-impl<T, V, S, E> EstimateNormal<T, V, S, E>
-where
-    E: NormalEstimator<T, V> + Default,
-    S: SDF<T, V>,
-    V: Vec<T>,
-{
-    /// Creates a new `EstimateNormal` with an SDF using the default version of the
-    /// estimator type.
-    pub fn new_default(sdf: S) -> Self {
-        EstimateNormal {
-            sdf,
-            estimator: E::default(),
-            _pdt: std::marker::PhantomData,
-            _pdv: std::marker::PhantomData,
-        }
-    }
+    _pd: std::marker::PhantomData<(T, V)>,
 }
 
 impl<T, V, S, E> EstimateNormal<T, V, S, E>
@@ -50,12 +26,12 @@ where
         EstimateNormal {
             sdf,
             estimator,
-            _pdt: std::marker::PhantomData,
-            _pdv: std::marker::PhantomData,
+            _pd: std::marker::PhantomData,
         }
     }
 
     /// Estimates the normal of the owned SDF at point p.
+    #[inline]
     pub fn normal_at(&self, p: V) -> V {
         self.estimator.estimate_normal(self.sdf, p)
     }
@@ -99,6 +75,7 @@ where
     T: Add<T, Output = T> + Sub<T, Output = T> + Copy,
     V: Vec3<T>,
 {
+    #[inline]
     fn estimate_normal<S: SDF<T, V>>(&self, sdf: S, p: V) -> V {
         let eps = self.eps;
         V::new(
@@ -118,6 +95,7 @@ where
     T: Add<T, Output = T> + Sub<T, Output = T> + Copy,
     V: Vec2<T>,
 {
+    #[inline]
     fn estimate_normal<S: SDF<T, V>>(&self, sdf: S, p: V) -> V {
         let eps = self.eps;
         V::new(
@@ -176,6 +154,7 @@ where
     T: Add<T, Output = T> + Sub<T, Output = T> + Neg<Output = T> + One + Copy,
     V: Vec3<T>,
 {
+    #[inline]
     fn estimate_normal<S: SDF<T, V>>(&self, sdf: S, p: V) -> V {
         let xyy = V::new(T::one(), -T::one(), -T::one());
         let yyx = V::new(-T::one(), -T::one(), T::one());
@@ -183,8 +162,8 @@ where
         let xxx = V::one();
 
         (xyy * sdf.dist(p + xyy * self.eps)
-            + yyx * sdf.dist(p + xyy * self.eps)
-            + yxy * sdf.dist(p + xyy * self.eps)
+            + yyx * sdf.dist(p + yyx * self.eps)
+            + yxy * sdf.dist(p + yxy * self.eps)
             + xxx * sdf.dist(p + xxx * self.eps))
         .normalized()
     }

@@ -2,15 +2,15 @@
 //! or combined using functions in `ops`. Note that these primitives are always
 //! centered around the origin and that you must transform the point you are sampling
 //! into 'primitive-local' space. Functions are provided in `mods` to do this easier.
-//! 
+//!
 //! Also note that while all translation and rotation transformations of the input point
 //! will work properly, scaling modifies the Euclidian space and therefore does not work
 //! normally. Utility function shave been provided to `Translate`, `Rotate`, and `Scale`
 //! in the `SDF` trait and the `mods` module.
 use crate::mathtypes::*;
 use crate::SDF;
-use std::ops::*;
 use std::marker::PhantomData;
+use std::ops::*;
 
 /// A shere centered at origin with a radius.
 #[derive(Clone, Copy, Debug)]
@@ -19,12 +19,15 @@ pub struct Sphere<T> {
 }
 
 impl<T> Sphere<T> {
-    pub fn new(radius: T) -> Self { Sphere { radius } }
+    pub fn new(radius: T) -> Self {
+        Sphere { radius }
+    }
 }
 
 impl<T, V> SDF<T, V> for Sphere<T>
-    where T: Sub<T, Output=T> + Copy,
-        V: Vec3<T>
+where
+    T: Sub<T, Output = T> + Copy,
+    V: Vec3<T>,
 {
     fn dist(&self, p: V) -> T {
         p.magnitude() - self.radius
@@ -39,28 +42,35 @@ pub struct Box<V, D> {
 }
 
 impl<V, D> Box<V, D> {
-    pub fn new(dims: V) -> Self { Box { dims, _pd: PhantomData } }
+    pub fn new(dims: V) -> Self {
+        Box {
+            dims,
+            _pd: PhantomData,
+        }
+    }
 }
 
 impl<T, V> SDF<T, V> for Box<V, Dim3D>
-    where T: Add<T, Output=T> + MaxMin + Zero + Copy,
-        V: Vec3<T> + Copy
+where
+    T: Add<T, Output = T> + MaxMin + Zero + Copy,
+    V: Vec3<T> + Copy,
 {
+    #[inline]
     fn dist(&self, p: V) -> T {
         let d = p.abs() - self.dims;
-        d.max(V::zero()).magnitude()
-            + d.y().max(d.z()).max(d.x()).min(T::zero())
+        d.max(V::zero()).magnitude() + d.y().max(d.z()).max(d.x()).min(T::zero())
     }
 }
 
 impl<T, V> SDF<T, V> for Box<V, Dim2D>
-    where T: Add<T, Output=T> + MaxMin + Zero + Copy,
-        V: Vec2<T> + Copy
+where
+    T: Add<T, Output = T> + MaxMin + Zero + Copy,
+    V: Vec2<T> + Copy,
 {
+    #[inline]
     fn dist(&self, p: V) -> T {
         let d = p.abs() - self.dims;
-        d.max(V::zero()).magnitude()
-            + d.y().max(d.x()).min(T::zero())
+        d.max(V::zero()).magnitude() + d.y().max(d.x()).min(T::zero())
     }
 }
 
@@ -71,13 +81,17 @@ pub struct Circle<T> {
 }
 
 impl<T> Circle<T> {
-    pub fn new(radius: T) -> Self { Circle { radius } }
+    pub fn new(radius: T) -> Self {
+        Circle { radius }
+    }
 }
 
 impl<T, V> SDF<T, V> for Circle<T>
-    where T: Sub<T, Output=T> + Copy,
-        V: Vec2<T>
+where
+    T: Sub<T, Output = T> + Copy,
+    V: Vec2<T>,
 {
+    #[inline]
     fn dist(&self, p: V) -> T {
         p.magnitude() - self.radius
     }
@@ -93,22 +107,31 @@ pub struct Torus<T> {
 }
 
 impl<T> Torus<T> {
-    pub fn new(radius: T, thickness: T) -> Self { Torus { radius, thickness } }
+    pub fn new(radius: T, thickness: T) -> Self {
+        Torus { radius, thickness }
+    }
 }
 
 impl<T, V> SDF<T, V> for Torus<T>
-    where T: Sub<T, Output=T> + Copy,
-        V: Vec3<T>,
+where
+    T: Sub<T, Output = T> + Copy,
+    V: Vec3<T>,
 {
+    #[inline]
     fn dist(&self, p: V) -> T {
-        let q = V::Vec2::new(V::Vec2::new(p.x(), p.z()).magnitude() - self.thickness, p.y());
+        let q = V::Vec2::new(
+            V::Vec2::new(p.x(), p.z()).magnitude() - self.thickness,
+            p.y(),
+        );
         q.magnitude() - self.radius
     }
 }
 
 #[derive(Clone, Copy, Debug)]
 pub enum Axis {
-    X, Y, Z
+    X,
+    Y,
+    Z,
 }
 
 /// An infinite cylinder extending along an axis.
@@ -119,13 +142,17 @@ pub struct Cylinder<T> {
 }
 
 impl<T> Cylinder<T> {
-    pub fn new(radius: T, axis: Axis) -> Self { Cylinder { radius, axis } }
+    pub fn new(radius: T, axis: Axis) -> Self {
+        Cylinder { radius, axis }
+    }
 }
 
 impl<T, V> SDF<T, V> for Cylinder<T>
-    where T: Sub<T, Output=T> + Copy,
-        V: Vec3<T>,
+where
+    T: Sub<T, Output = T> + Copy,
+    V: Vec3<T>,
 {
+    #[inline]
     fn dist(&self, p: V) -> T {
         let (a, b) = match self.axis {
             Axis::X => (p.y(), p.z()),
@@ -145,20 +172,29 @@ pub struct CappedCylinder<T> {
 }
 
 impl<T> CappedCylinder<T> {
-    pub fn new(radius: T, height: T, axis: Axis) -> Self { CappedCylinder { radius, height, axis } }
+    pub fn new(radius: T, height: T, axis: Axis) -> Self {
+        CappedCylinder {
+            radius,
+            height,
+            axis,
+        }
+    }
 }
 
 impl<T, V> SDF<T, V> for CappedCylinder<T>
-    where T: Sub<T, Output=T> + Add<T, Output=T> + Zero + MaxMin + Copy,
-        V: Vec3<T>,
+where
+    T: Sub<T, Output = T> + Add<T, Output = T> + Zero + MaxMin + Copy,
+    V: Vec3<T>,
 {
+    #[inline]
     fn dist(&self, p: V) -> T {
         let (a, b, c) = match self.axis {
             Axis::X => (p.y(), p.z(), p.x()),
             Axis::Y => (p.x(), p.z(), p.y()),
             Axis::Z => (p.x(), p.y(), p.z()),
         };
-        let d = V::Vec2::new(V::Vec2::new(a, b).magnitude(), c).abs() - V::Vec2::new(self.radius, self.height);
+        let d = V::Vec2::new(V::Vec2::new(a, b).magnitude(), c).abs()
+            - V::Vec2::new(self.radius, self.height);
         d.x().max(d.y()).min(T::zero()) + d.max(V::Vec2::zero()).magnitude()
     }
 }
@@ -172,13 +208,17 @@ pub struct Line<T, V> {
 }
 
 impl<T, V> Line<T, V> {
-    pub fn new(a: V, b: V, thickness: T) -> Self { Line { a, b, thickness } }
+    pub fn new(a: V, b: V, thickness: T) -> Self {
+        Line { a, b, thickness }
+    }
 }
 
 impl<T, V> SDF<T, V> for Line<T, V>
-where T: Sub<T, Output=T> + Mul<T, Output=T> + Div<T, Output=T> + Zero + One + Clamp + Copy,
+where
+    T: Sub<T, Output = T> + Mul<T, Output = T> + Div<T, Output = T> + Zero + One + Clamp + Copy,
     V: Vec<T> + Copy,
 {
+    #[inline]
     fn dist(&self, p: V) -> T {
         let pa = p - self.a;
         let ba = self.b - self.a;
