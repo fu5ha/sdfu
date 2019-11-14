@@ -158,7 +158,7 @@ impl<T, V: Vec<T>> TetrahedralEstimator<T, V> {
 
 impl<T, V> NormalEstimator<T, V> for TetrahedralEstimator<T, V>
 where
-    T: Add<T, Output = T> + Sub<T, Output = T> + Neg<Output = T> + One + Copy,
+    T: Add<T, Output = T> + Sub<T, Output = T> + Neg<Output = T> + One + Copy + std::fmt::Display,
     V: Vec3<T>,
 {
     #[inline]
@@ -168,11 +168,12 @@ where
         let yxy = V::new(-T::one(), T::one(), -T::one());
         let xxx = V::one();
 
-        (xyy * sdf.dist(p + xyy * self.eps)
-            + yyx * sdf.dist(p + yyx * self.eps)
-            + yxy * sdf.dist(p + yxy * self.eps)
-            + xxx * sdf.dist(p + xxx * self.eps))
-        .normalized()
+        let d1 = sdf.dist(p + xyy * self.eps);
+        let d2 = sdf.dist(p + yyx * self.eps);
+        let d3 = sdf.dist(p + yxy * self.eps);
+        let d4 = sdf.dist(p + xxx * self.eps);
+
+        (xyy * d1 + yyx * d2 + yxy * d3 + xxx * d4).normalized()
     }
 }
 
