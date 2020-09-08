@@ -1,6 +1,6 @@
 [package]
 name = "sdfu"
-version = "0.1.2"
+version = "0.3.0"
 authors = ["Gray Olson <gray@grayolson.com>"]
 description = "Signed Distance Field (Function) Utilities. Contains functions for creating, combining, modifying, and using analytic SDFs for computer graphics."
 license = "MIT OR Apache-2.0"
@@ -9,5 +9,7 @@ readme = "README.md"
 edition = "2018"
 
 [dependencies]
-vek = { version="0.9", optional=true }
-nalgebra = { version="0.18", optional=true }
+vek = { version = "0.9", optional = true }
+nalgebra = { version = "0.18", optional = true }
+ultraviolet = { version = "0.4", optional = true }
+# ultraviolet = { path = "../ultraviolet", optional=true }
