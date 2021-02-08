@@ -131,7 +131,7 @@ pub trait SDF<T, V: Vec<T>>: Copy {
     ) -> Union<T, Self, O, M> {
         Union::new(self, other, min_function)
     }
-    /// Get the subtracion of another SDF from this one. Note that this operation is *not* commutative,
+    /// Get the subtraction of another SDF from this one. Note that this operation is *not* commutative,
     /// i.e. `a.subtraction(b) =/= b.subtraction(a)`.
     fn subtract<O: SDF<T, V>>(self, other: O) -> Subtraction<O, Self> {
         Subtraction::new(other, self)

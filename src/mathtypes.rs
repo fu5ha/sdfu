@@ -29,7 +29,7 @@ pub trait Vec<T>:
     fn normalized(&self) -> Self;
 }
 
-/// Functionality that must be implmeented by 3D vectors.
+/// Functionality that must be implemented by 3D vectors.
 pub trait Vec3<T>: Vec<T> {
     fn new(x: T, y: T, z: T) -> Self;
     fn x(&self) -> T;
@@ -37,14 +37,14 @@ pub trait Vec3<T>: Vec<T> {
     fn z(&self) -> T;
 }
 
-/// Functionality that must be implmeented by 2D vectors.
+/// Functionality that must be implemented by 2D vectors.
 pub trait Vec2<T>: Vec<T> {
     fn new(x: T, y: T) -> Self;
     fn x(&self) -> T;
     fn y(&self) -> T;
 }
 
-/// A trait used to mark the dimensionality of a vector/SDF/implmentation
+/// A trait used to mark the dimensionality of a vector/SDF/implementation
 /// of an SDF combinator.
 pub trait Dimension {}
 
@@ -52,7 +52,7 @@ pub trait Dimension {}
 #[derive(Clone, Copy, Debug)]
 pub struct Dim2D {}
 
-/// 2D marker struct.
+/// 3D marker struct.
 #[derive(Clone, Copy, Debug)]
 pub struct Dim3D {}
 

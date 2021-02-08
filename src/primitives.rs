@@ -12,7 +12,7 @@ use crate::SDF;
 use std::marker::PhantomData;
 use std::ops::*;
 
-/// A shere centered at origin with a radius.
+/// A sphere centered at origin with a radius.
 #[derive(Clone, Copy, Debug)]
 pub struct Sphere<T> {
     pub radius: T,
