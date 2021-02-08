@@ -477,7 +477,14 @@ pub mod ultraviolet_integration {
         };
     }
 
-    impl_numerics!(uv::Vec2, uv::Vec2x4, uv::Vec2x8, uv::Vec3, uv::Vec3x4, uv::Vec3x8);
+    impl_numerics!(
+        uv::Vec2,
+        uv::Vec2x4,
+        uv::Vec2x8,
+        uv::Vec3,
+        uv::Vec3x4,
+        uv::Vec3x8
+    );
 
     macro_rules! impl_vec2 {
         ($($vt:ty => $t:ty),+) => {
@@ -495,7 +502,7 @@ pub mod ultraviolet_integration {
             )+
         }
     }
-    impl_vec2!(uv::Vec2 => f32, uv::Vec2x4 => f32x4);
+    impl_vec2!(uv::Vec2 => f32, uv::Vec2x4 => f32x4, uv::Vec2x8 => f32x8);
 
     macro_rules! impl_vec3 {
         ($($vt:ty => $t:ty),+) => {
@@ -513,7 +520,7 @@ pub mod ultraviolet_integration {
             })+
         }
     }
-    impl_vec3!(uv::Vec3 => f32, uv::Vec3x4 => f32x4);
+    impl_vec3!(uv::Vec3 => f32, uv::Vec3x4 => f32x4, uv::Vec3x8 => f32x8);
 
     macro_rules! impl_vec_vec2 {
         ($($vt:ty, $v3t:ty => $t:ty),+) => {
@@ -544,7 +551,7 @@ pub mod ultraviolet_integration {
             })+
         }
     }
-    impl_vec_vec2!(uv::Vec2, uv::Vec3 => f32, uv::Vec2x4, uv::Vec3x4 => f32x4);
+    impl_vec_vec2!(uv::Vec2, uv::Vec3 => f32, uv::Vec2x4, uv::Vec3x4 => f32x4, uv::Vec2x8, uv::Vec3x8 => f32x8);
 
     macro_rules! impl_vec_vec3 {
         ($($vt:ty, $v2t:ty => $t:ty),+) => {
@@ -575,7 +582,7 @@ pub mod ultraviolet_integration {
             })+
         }
     }
-    impl_vec_vec3!(uv::Vec3, uv::Vec2 => f32, uv::Vec3x4, uv::Vec2x4 => f32x4);
+    impl_vec_vec3!(uv::Vec3, uv::Vec2 => f32, uv::Vec3x4, uv::Vec2x4 => f32x4, uv::Vec3x8, uv::Vec2x8 => f32x8);
 
     macro_rules! impl_rotation_rotor {
         {$($rt:ty => $vt:ty),+} => {
@@ -591,8 +598,10 @@ pub mod ultraviolet_integration {
     impl_rotation_rotor! {
         uv::Rotor2 => uv::Vec2,
         uv::Rotor2x4 => uv::Vec2x4,
+        uv::Rotor2x8 => uv::Vec2x8,
         uv::Rotor3 => uv::Vec3,
-        uv::Rotor3x4 => uv::Vec3x4
+        uv::Rotor3x4 => uv::Vec3x4,
+        uv::Rotor3x8 => uv::Vec3x8
     }
 }
 
