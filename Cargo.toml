@@ -14,10 +14,10 @@ all-features = true
 [dependencies]
 vek = { version = "0.14", optional = true }
 nalgebra = { version = "0.24", optional = true }
-ultraviolet = { version = "0.4", optional = true }
+ultraviolet = { version = "0.7", optional = true }
 # ultraviolet = { path = "../ultraviolet", optional=true }
 
 [dev-dependencies]
 vek = "0.14"
 nalgebra = "0.24"
-ultraviolet = "0.4"
+ultraviolet = "0.7"
