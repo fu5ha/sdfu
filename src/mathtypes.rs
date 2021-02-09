@@ -1,3 +1,5 @@
+//! Traits that have to implemented by vector and scalar traits to be used by this library.
+
 use std::ops::*;
 
 #[cfg(feature = "ultraviolet")]
@@ -179,7 +181,7 @@ impl PointFive for f64 {
 }
 
 /// Linear interpolate between self and other with a factor
-/// between Self::zero() and Self::one.
+/// between `Self::zero()` and `Self::one()`.
 pub trait Lerp {
     fn lerp(&self, other: Self, factor: Self) -> Self;
 }
@@ -270,6 +272,7 @@ pub trait Rotation<V> {
 }
 
 #[cfg(feature = "vek")]
+#[doc(hidden)]
 pub mod vek_integration {
     use super::*;
 
@@ -470,6 +473,7 @@ pub mod vek_integration {
 }
 
 #[cfg(feature = "ultraviolet")]
+#[doc(hidden)]
 pub mod ultraviolet_integration {
     use super::*;
     use ultraviolet as uv;
@@ -649,6 +653,7 @@ impl Clamp for f64 {
 }
 
 #[cfg(feature = "nalgebra")]
+#[doc(hidden)]
 pub mod nalgebra_integration {
     use super::*;
     use nalgebra as na;

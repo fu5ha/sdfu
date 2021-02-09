@@ -8,6 +8,9 @@ repository = "https://github.com/termhn/sdfu"
 readme = "README.md"
 edition = "2018"
 
+[package.metadata.docs.rs]
+all-features = true
+
 [dependencies]
 vek = { version = "0.9", optional = true }
 nalgebra = { version = "0.18", optional = true }

@@ -4,11 +4,12 @@
 //! in the context of computer graphics, especially ray-marching based renderers. Most
 //! of what is here is based on [Inigo Quilez' excellent articles](http://www.iquilezles.org/www/index.htm).
 //!
-//! If you're using one of the more popular math libraries in Rust, then just enable
-//! the corresponding feature and hopefully all the necessary traits are already implemented
-//! for you so that you can just start passing in your `Vec3`s or whatever your lib calls them
-//! and you're off to the races! If not, then you can implement the necessary traits in the
-//! `mathtypes` module and still use this library with your own math lib.
+//! If you're using one of the more popular math libraries in Rust, then just enable the corresponding
+//! feature (currently, [`ultraviolet`](https://github.com/termhn/ultraviolet), `nalgebra` and `vek`
+//! are supported) and hopefully all the necessary traits are already implemented for you so that
+//! you can just start passing in your `Vec3`s or whatever your lib calls them and you're off to the
+//! races! If not, then you can implement the necessary traits in the `mathtypes` module and still use
+//! this library with your own math lib.
 //!
 //! This crate is built around the central trait `SDF`. This trait is structured in a similar way to
 //! how `std::iter::Iterator` works. Anything that implements `SDF` is able to return a distance from
@@ -27,7 +28,10 @@
 //! by leveraging `sdfu`. The SDF that is rendered above was created with the following code:
 //!
 //! ```rust
+//! # #[cfg(feature = "ultraviolet")]
+//! # fn main() {
 //! use sdfu::SDF;
+//! use ultraviolet::Vec3;
 //!
 //! let sdf = sdfu::Sphere::new(0.45)
 //!     .subtract(
@@ -47,6 +51,9 @@
 //!     .subtract(
 //!         sdfu::Box::new(Vec3::new(0.2, 2.0, 0.2)))
 //!     .translate(Vec3::new(0.0, 0.0, -1.0));
+//! # }
+//! # #[cfg(not(feature = "ultraviolet"))]
+//! # fn main() {}
 //! ```
 pub mod mathtypes;
 use mathtypes::*;
