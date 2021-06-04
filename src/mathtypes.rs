@@ -1,7 +1,11 @@
+//! Traits that have to implemented by vector and scalar traits to be used by this library.
+
 use std::ops::*;
 
 #[cfg(feature = "ultraviolet")]
 use ultraviolet::f32x4;
+#[cfg(feature = "ultraviolet")]
+use ultraviolet::f32x8;
 
 /// Functionality that should be shared between all vector types.
 pub trait Vec<T>:
@@ -27,7 +31,7 @@ pub trait Vec<T>:
     fn normalized(&self) -> Self;
 }
 
-/// Functionality that must be implmeented by 3D vectors.
+/// Functionality that must be implemented by 3D vectors.
 pub trait Vec3<T>: Vec<T> {
     fn new(x: T, y: T, z: T) -> Self;
     fn x(&self) -> T;
@@ -35,14 +39,14 @@ pub trait Vec3<T>: Vec<T> {
     fn z(&self) -> T;
 }
 
-/// Functionality that must be implmeented by 2D vectors.
+/// Functionality that must be implemented by 2D vectors.
 pub trait Vec2<T>: Vec<T> {
     fn new(x: T, y: T) -> Self;
     fn x(&self) -> T;
     fn y(&self) -> T;
 }
 
-/// A trait used to mark the dimensionality of a vector/SDF/implmentation
+/// A trait used to mark the dimensionality of a vector/SDF/implementation
 /// of an SDF combinator.
 pub trait Dimension {}
 
@@ -50,7 +54,7 @@ pub trait Dimension {}
 #[derive(Clone, Copy, Debug)]
 pub struct Dim2D {}
 
-/// 2D marker struct.
+/// 3D marker struct.
 #[derive(Clone, Copy, Debug)]
 pub struct Dim3D {}
 
@@ -63,65 +67,28 @@ pub trait MaxMin {
     fn min(&self, other: Self) -> Self;
 }
 
-impl MaxMin for f32 {
-    #[inline]
-    fn max(&self, other: Self) -> Self {
-        f32::max(*self, other)
-    }
-    #[inline]
-    fn min(&self, other: Self) -> Self {
-        f32::min(*self, other)
-    }
-}
-
-impl MaxMin for f64 {
-    #[inline]
-    fn max(&self, other: Self) -> Self {
-        f64::max(*self, other)
-    }
-    #[inline]
-    fn min(&self, other: Self) -> Self {
-        f64::min(*self, other)
+macro_rules! impl_max_min {
+    ($($scalar_t:ty),+) => {
+        $(impl MaxMin for $scalar_t {
+            #[inline]
+            fn max(&self, other: Self) -> Self {
+                <$scalar_t>::max(*self, other)
+            }
+            #[inline]
+            fn min(&self, other: Self) -> Self {
+                <$scalar_t>::min(*self, other)
+            }
+        })+
     }
 }
 
+impl_max_min!(f32, f64);
 #[cfg(feature = "ultraviolet")]
-impl MaxMin for f32x4 {
-    #[inline]
-    fn max(&self, other: Self) -> Self {
-        f32x4::max(*self, other)
-    }
-    #[inline]
-    fn min(&self, other: Self) -> Self {
-        f32x4::min(*self, other)
-    }
-}
+impl_max_min!(f32x4, f32x8);
 
 /// The multiplicative identity.
 pub trait One {
     fn one() -> Self;
-}
-
-#[cfg(feature = "ultraviolet")]
-impl One for f32x4 {
-    #[inline]
-    fn one() -> Self {
-        f32x4::from(1.0)
-    }
-}
-
-impl One for f32 {
-    #[inline]
-    fn one() -> Self {
-        1.0
-    }
-}
-
-impl One for f64 {
-    #[inline]
-    fn one() -> Self {
-        1.0
-    }
 }
 
 /// The additive identity.
@@ -129,57 +96,36 @@ pub trait Zero {
     fn zero() -> Self;
 }
 
-#[cfg(feature = "ultraviolet")]
-impl Zero for f32x4 {
-    #[inline]
-    fn zero() -> Self {
-        f32x4::from(0.0)
-    }
-}
-
-impl Zero for f32 {
-    #[inline]
-    fn zero() -> Self {
-        0.0
-    }
-}
-
-impl Zero for f64 {
-    #[inline]
-    fn zero() -> Self {
-        0.0
-    }
-}
-
 /// Multiply by half.
 pub trait PointFive {
     fn point_five() -> Self;
 }
 
+macro_rules! impl_number_factory {
+    ($trait_name:ident, $function_name:ident, $number:literal, $($scalar_t:ty),+) => {
+        $(impl $trait_name for $scalar_t {
+            #[inline]
+            fn $function_name() -> Self {
+                <$scalar_t>::from($number)
+            }
+        })+
+    }
+}
+
+impl_number_factory!(One, one, 1.0, f32, f64);
 #[cfg(feature = "ultraviolet")]
-impl PointFive for f32x4 {
-    #[inline]
-    fn point_five() -> Self {
-        f32x4::from(0.5)
-    }
-}
+impl_number_factory!(One, one, 1.0, f32x4, f32x8);
 
-impl PointFive for f32 {
-    #[inline]
-    fn point_five() -> Self {
-        0.5
-    }
-}
+impl_number_factory!(Zero, zero, 0.0, f32, f64);
+#[cfg(feature = "ultraviolet")]
+impl_number_factory!(Zero, zero, 0.0, f32x4, f32x8);
 
-impl PointFive for f64 {
-    #[inline]
-    fn point_five() -> Self {
-        0.5
-    }
-}
+impl_number_factory!(PointFive, point_five, 0.5, f32, f64);
+#[cfg(feature = "ultraviolet")]
+impl_number_factory!(PointFive, point_five, 0.5, f32x4, f32x8);
 
 /// Linear interpolate between self and other with a factor
-/// between Self::zero() and Self::one.
+/// between `Self::zero()` and `Self::one()`.
 pub trait Lerp {
     fn lerp(&self, other: Self, factor: Self) -> Self;
 }
@@ -199,38 +145,52 @@ pub trait Clamp {
     fn clamp(&self, low: Self, high: Self) -> Self;
 }
 
-#[cfg(feature = "ultraviolet")]
-impl Clamp for f32x4 {
-    #[inline]
-    fn clamp(&self, low: Self, high: Self) -> Self {
-        self.max(low).min(high)
+macro_rules! impl_clamp {
+    ($($scalar_t:ty),+) => {
+        $(impl Clamp for $scalar_t {
+            #[inline]
+            fn clamp(&self, low: Self, high: Self) -> Self {
+                self.max(low).min(high)
+            }
+        })+
     }
 }
+
+impl_clamp!(f32, f64);
+#[cfg(feature = "ultraviolet")]
+impl_clamp!(f32x4, f32x8);
 
 /// Raises `2^(self)`
 pub trait Exp2 {
     fn exp2(&self) -> Self;
 }
 
+macro_rules! impl_exp2 {
+    ($($scalar_t:ty),+) => {
+        $(impl Exp2 for $scalar_t {
+            #[inline]
+            fn exp2(&self) -> Self {
+                <$scalar_t>::exp2(*self)
+            }
+        })+
+    }
+}
+
+impl_exp2!(f32, f64);
+
 #[cfg(feature = "ultraviolet")]
 impl Exp2 for f32x4 {
     #[inline]
     fn exp2(&self) -> Self {
-        f32x4::exp2(*self)
+        f32x4::from(2.0).pow_f32x4(*self)
     }
 }
 
-impl Exp2 for f32 {
+#[cfg(feature = "ultraviolet")]
+impl Exp2 for f32x8 {
     #[inline]
     fn exp2(&self) -> Self {
-        f32::exp2(*self)
-    }
-}
-
-impl Exp2 for f64 {
-    #[inline]
-    fn exp2(&self) -> Self {
-        f64::exp2(*self)
+        f32x8::from(2.0).pow_f32x8(*self)
     }
 }
 
@@ -239,27 +199,20 @@ pub trait Log2 {
     fn log2(&self) -> Self;
 }
 
+macro_rules! impl_log2 {
+    ($($scalar_t:ty),+) => {
+        $(impl Log2 for $scalar_t {
+            #[inline]
+            fn log2(&self) -> Self {
+                <$scalar_t>::log2(*self)
+            }
+        })+
+    }
+}
+
+impl_log2!(f32, f64);
 #[cfg(feature = "ultraviolet")]
-impl Log2 for f32x4 {
-    #[inline]
-    fn log2(&self) -> Self {
-        f32x4::log2(*self)
-    }
-}
-
-impl Log2 for f32 {
-    #[inline]
-    fn log2(&self) -> Self {
-        f32::log2(*self)
-    }
-}
-
-impl Log2 for f64 {
-    #[inline]
-    fn log2(&self) -> Self {
-        f64::log2(*self)
-    }
-}
+impl_log2!(f32x4, f32x8);
 
 /// This is a trait for types that can rotate an SDF.
 /// Note that the implementation should actually rotate the vec
@@ -270,12 +223,22 @@ pub trait Rotation<V> {
 }
 
 #[cfg(feature = "vek")]
+#[doc(hidden)]
 pub mod vek_integration {
     use super::*;
 
-    impl<T: vek::ops::Clamp + Copy> Clamp for T {
+    impl<T: vek::ops::Clamp + Copy> Clamp for vek::vec::Vec2<T> {
         #[inline]
-        fn clamp(&self, low: T, high: T) -> T {
+        fn clamp(&self, low: Self, high: Self) -> Self {
+            use vek::Clamp;
+            self.clamped(low, high)
+        }
+    }
+
+    impl<T: vek::ops::Clamp + Copy> Clamp for vek::vec::Vec3<T> {
+        #[inline]
+        fn clamp(&self, low: Self, high: Self) -> Self {
+            use vek::Clamp;
             self.clamped(low, high)
         }
     }
@@ -470,6 +433,7 @@ pub mod vek_integration {
 }
 
 #[cfg(feature = "ultraviolet")]
+#[doc(hidden)]
 pub mod ultraviolet_integration {
     use super::*;
     use ultraviolet as uv;
@@ -513,7 +477,14 @@ pub mod ultraviolet_integration {
         };
     }
 
-    impl_numerics!(uv::Vec2, uv::Wec2, uv::Vec3, uv::Wec3);
+    impl_numerics!(
+        uv::Vec2,
+        uv::Vec2x4,
+        uv::Vec2x8,
+        uv::Vec3,
+        uv::Vec3x4,
+        uv::Vec3x8
+    );
 
     macro_rules! impl_vec2 {
         ($($vt:ty => $t:ty),+) => {
@@ -531,7 +502,7 @@ pub mod ultraviolet_integration {
             )+
         }
     }
-    impl_vec2!(uv::Vec2 => f32, uv::Wec2 => f32x4);
+    impl_vec2!(uv::Vec2 => f32, uv::Vec2x4 => f32x4, uv::Vec2x8 => f32x8);
 
     macro_rules! impl_vec3 {
         ($($vt:ty => $t:ty),+) => {
@@ -549,7 +520,7 @@ pub mod ultraviolet_integration {
             })+
         }
     }
-    impl_vec3!(uv::Vec3 => f32, uv::Wec3 => f32x4);
+    impl_vec3!(uv::Vec3 => f32, uv::Vec3x4 => f32x4, uv::Vec3x8 => f32x8);
 
     macro_rules! impl_vec_vec2 {
         ($($vt:ty, $v3t:ty => $t:ty),+) => {
@@ -580,7 +551,7 @@ pub mod ultraviolet_integration {
             })+
         }
     }
-    impl_vec_vec2!(uv::Vec2, uv::Vec3 => f32, uv::Wec2, uv::Wec3 => f32x4);
+    impl_vec_vec2!(uv::Vec2, uv::Vec3 => f32, uv::Vec2x4, uv::Vec3x4 => f32x4, uv::Vec2x8, uv::Vec3x8 => f32x8);
 
     macro_rules! impl_vec_vec3 {
         ($($vt:ty, $v2t:ty => $t:ty),+) => {
@@ -611,7 +582,7 @@ pub mod ultraviolet_integration {
             })+
         }
     }
-    impl_vec_vec3!(uv::Vec3, uv::Vec2 => f32, uv::Wec3, uv::Wec2 => f32x4);
+    impl_vec_vec3!(uv::Vec3, uv::Vec2 => f32, uv::Vec3x4, uv::Vec2x4 => f32x4, uv::Vec3x8, uv::Vec2x8 => f32x8);
 
     macro_rules! impl_rotation_rotor {
         {$($rt:ty => $vt:ty),+} => {
@@ -626,29 +597,16 @@ pub mod ultraviolet_integration {
 
     impl_rotation_rotor! {
         uv::Rotor2 => uv::Vec2,
-        uv::WRotor2 => uv::Wec2,
+        uv::Rotor2x4 => uv::Vec2x4,
+        uv::Rotor2x8 => uv::Vec2x8,
         uv::Rotor3 => uv::Vec3,
-        uv::WRotor3 => uv::Wec3
-    }
-}
-
-#[cfg(not(feature = "vek"))]
-impl Clamp for f32 {
-    #[inline]
-    fn clamp(&self, low: Self, high: Self) -> Self {
-        self.max(low).min(high)
-    }
-}
-
-#[cfg(not(feature = "vek"))]
-impl Clamp for f64 {
-    #[inline]
-    fn clamp(&self, low: Self, high: Self) -> Self {
-        self.max(low).min(high)
+        uv::Rotor3x4 => uv::Vec3x4,
+        uv::Rotor3x8 => uv::Vec3x8
     }
 }
 
 #[cfg(feature = "nalgebra")]
+#[doc(hidden)]
 pub mod nalgebra_integration {
     use super::*;
     use nalgebra as na;

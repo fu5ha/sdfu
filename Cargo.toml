@@ -8,8 +8,16 @@ repository = "https://github.com/termhn/sdfu"
 readme = "README.md"
 edition = "2018"
 
+[package.metadata.docs.rs]
+all-features = true
+
 [dependencies]
-vek = { version = "0.9", optional = true }
-nalgebra = { version = "0.18", optional = true }
-ultraviolet = { version = "0.4", optional = true }
+vek = { version = "0.15", optional = true }
+nalgebra = { version = "0.27", optional = true }
+ultraviolet = { version = "0.8", optional = true }
 # ultraviolet = { path = "../ultraviolet", optional=true }
+
+[dev-dependencies]
+vek = "0.15"
+nalgebra = "0.27"
+ultraviolet = "0.8"

@@ -79,7 +79,7 @@ where
 /// This uses a polynomial function to smooth between the two
 /// values, and `k` controls the radius/distance of the
 /// smoothing. 0.1 is a good default value for `k` for this
-/// smoothign function.
+/// smoothing function.
 #[derive(Clone, Copy, Debug)]
 pub struct PolySmoothMin<T> {
     pub k: T,
@@ -184,7 +184,7 @@ where
     }
 }
 
-/// Get the subtracion of two SDFs. Note that this operation is *not* commutative,
+/// Get the subtraction of two SDFs. Note that this operation is *not* commutative,
 /// i.e. `Subtraction::new(a, b) =/= Subtraction::new(b, a)`.
 #[derive(Clone, Copy, Debug)]
 pub struct Subtraction<S1, S2> {
@@ -193,7 +193,7 @@ pub struct Subtraction<S1, S2> {
 }
 
 impl<S1, S2> Subtraction<S1, S2> {
-    /// Get the subtracion of two SDFs. Note that this operation is *not* commutative,
+    /// Get the subtraction of two SDFs. Note that this operation is *not* commutative,
     /// i.e. `Subtraction::new(a, b) =/= Subtraction::new(b, a)`.
     pub fn new(sdf1: S1, sdf2: S2) -> Self {
         Subtraction { sdf1, sdf2 }
