@@ -817,3 +817,161 @@ pub mod nalgebra_integration {
     }
     impl_rot!(f32, f64);
 }
+
+#[cfg(feature = "glam")]
+#[doc(hidden)]
+pub mod glam_integration {
+    use super::*;
+
+    use glam as gl;
+
+    impl Zero for gl::Vec2 {
+        #[inline]
+        fn zero() -> Self {
+            Self::ZERO
+        }
+    }
+
+    impl One for gl::Vec2 {
+        #[inline]
+        fn one() -> Self {
+            gl::Vec2::new(1.0, 1.0)
+        }
+    }
+
+    impl Clamp for gl::Vec2 {
+        #[inline]
+        fn clamp(&self, low: Self, high: Self) -> Self {
+            self.min(high).max(low)
+        }
+    }
+
+    impl MaxMin for gl::Vec2 {
+        #[inline]
+        fn max(&self, other: Self) -> Self {
+            gl::Vec2::max(*self, other)
+        }
+        #[inline]
+        fn min(&self, other: Self) -> Self {
+            gl::Vec2::min(*self, other)
+        }
+    }
+
+    impl Zero for gl::Vec3A {
+        #[inline]
+        fn zero() -> Self {
+            gl::Vec3A::ZERO
+        }
+    }
+
+    impl One for gl::Vec3A {
+        #[inline]
+        fn one() -> Self {
+            gl::Vec3A::new(1.0, 1.0, 1.0)
+        }
+    }
+
+    impl Clamp for gl::Vec3A {
+        #[inline]
+        fn clamp(&self, low: Self, high: Self) -> Self {
+            self.min(high).max(low)
+        }
+    }
+
+    impl MaxMin for gl::Vec3A {
+        #[inline]
+        fn max(&self, other: Self) -> Self {
+            gl::Vec3A::max(*self, other)
+        }
+        #[inline]
+        fn min(&self, other: Self) -> Self {
+            gl::Vec3A::min(*self, other)
+        }
+    }
+
+    impl Vec2<f32> for gl::Vec2 {
+        #[inline]
+        fn new(x: f32, y: f32) -> Self {
+            gl::Vec2::new(x, y)
+        }
+        #[inline]
+        fn x(&self) -> f32 {
+            self.x
+        }
+        #[inline]
+        fn y(&self) -> f32 {
+            self.y
+        }
+    }
+
+    impl Vec3<f32> for gl::Vec3A {
+        #[inline]
+        fn new(x: f32, y: f32, z: f32) -> Self {
+            gl::Vec3A::new(x, y, z)
+        }
+        #[inline]
+        fn x(&self) -> f32 {
+            self.x
+        }
+        #[inline]
+        fn y(&self) -> f32 {
+            self.y
+        }
+        #[inline]
+        fn z(&self) -> f32 {
+            self.z
+        }
+    }
+
+    impl Vec<f32> for gl::Vec2 {
+        type Dimension = Dim2D;
+        type Vec2 = gl::Vec2;
+        type Vec3 = gl::Vec3A;
+
+        #[inline]
+        fn dot(&self, other: Self) -> f32 {
+            gl::Vec2::dot(*self, other)
+        }
+
+        #[inline]
+        fn abs(&self) -> Self {
+            gl::Vec2::abs(*self)
+        }
+
+        #[inline]
+        fn normalized(&self) -> Self {
+            *self / self.length()
+        }
+
+        #[inline]
+        fn magnitude(&self) -> f32 {
+            self.length()
+        }
+    }
+
+    impl Vec<f32> for gl::Vec3A {
+        type Dimension = Dim3D;
+        type Vec2 = gl::Vec2;
+        type Vec3 = gl::Vec3A;
+
+        #[inline]
+        fn dot(&self, other: Self) -> f32 {
+            gl::Vec3A::dot(*self, other)
+        }
+
+        #[inline]
+        fn abs(&self) -> Self {
+            gl::Vec3A::abs(*self)
+        }
+
+        #[inline]
+        fn normalized(&self) -> Self {
+            *self / self.length()
+        }
+
+        #[inline]
+        fn magnitude(&self) -> f32 {
+            self.length()
+        }
+    }
+}
