@@ -12,7 +12,7 @@ edition = "2018"
 all-features = true
 
 [dependencies]
-glam = { version = "0.18", optional = true }
+glam = { version = ">=0.18", optional = true }
 vek = { version = "0.15", optional = true }
 nalgebra = { version = "0.27", optional = true }
 ultraviolet = { version = "0.8", optional = true }

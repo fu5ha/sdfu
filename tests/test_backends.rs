@@ -24,3 +24,12 @@ fn test_vek() {
     let dist: f32 = sdf.dist(vek::vec::Vec3::zero());
     assert_eq!(dist, -1.0);
 }
+
+#[cfg(feature = "glam")]
+#[test]
+fn test_glam() {
+    use sdfu::SDF;
+    let sdf = sdfu::Sphere::new(1.0);
+    let dist: f32 = sdf.dist(glam::Vec3A::ZERO);
+    assert_eq!(dist, -1.0);
+}
